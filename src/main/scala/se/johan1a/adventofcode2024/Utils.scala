@@ -70,6 +70,12 @@ object Utils {
     groups
   }
 
+  def inRange(grid: ArrayBuffer[ArrayBuffer[Char]], pos: Vec2): Boolean = {
+    val min = Vec2(0, 0)
+    val max = Vec2(grid.size, grid.head.size)
+    inRange(pos, min, max)
+  }
+
   def inRange(pos: Vec2, min: Vec2, max: Vec2): Boolean =
     pos.x >= min.x && pos.x < max.x && pos.y >= min.y && pos.y < max.y
 
@@ -125,6 +131,8 @@ object Utils {
   def makeGrid(lines: Seq[String]): ArrayBuffer[ArrayBuffer[Char]] = {
     new ArrayBuffer().appendAll(lines.map(l => new ArrayBuffer().appendAll(l)))
   }
+
+  def get(grid: ArrayBuffer[ArrayBuffer[Char]], pos: Vec2) = grid(pos.y.toInt)(pos.x.toInt)
 
   def getMax(grid: ArrayBuffer[ArrayBuffer[Char]]): Vec2 =
     Vec2(grid.head.size, grid.size)
