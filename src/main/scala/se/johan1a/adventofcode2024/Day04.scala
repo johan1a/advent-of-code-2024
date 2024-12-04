@@ -8,7 +8,7 @@ object Day04 {
   def part1(input: Seq[String]): Long = {
     val grid = makeGrid(input)
     allPositions(grid)
-      .filter(pos => grid(pos.y.toInt)(pos.x.toInt) == 'X')
+      .filter(pos => gridEquals(grid, pos, 'X'))
       .map(count(grid, _))
       .sum
   }
@@ -47,14 +47,12 @@ object Day04 {
     val bottomRight = Vec2(pos.x + 1, pos.y + 1)
     val topRight = Vec2(pos.x + 1, pos.y - 1)
     val bottomLeft = Vec2(pos.x - 1, pos.y + 1)
-    val res =
-      gridEquals(grid, pos, 'A')
-        &&
-          (gridEquals(grid, topLeft, 'M') && gridEquals(grid, bottomRight, 'S')
-            || gridEquals(grid, topLeft, 'S') && gridEquals(grid, bottomRight, 'M'))
-          &&
-          (gridEquals(grid, topRight, 'M') && gridEquals(grid, bottomLeft, 'S')
-            || gridEquals(grid, topRight, 'S') && gridEquals(grid, bottomLeft, 'M'))
-    res
+    gridEquals(grid, pos, 'A')
+    &&
+    (gridEquals(grid, topLeft, 'M') && gridEquals(grid, bottomRight, 'S')
+      || gridEquals(grid, topLeft, 'S') && gridEquals(grid, bottomRight, 'M'))
+    &&
+    (gridEquals(grid, topRight, 'M') && gridEquals(grid, bottomLeft, 'S')
+      || gridEquals(grid, topRight, 'S') && gridEquals(grid, bottomLeft, 'M'))
   }
 }
