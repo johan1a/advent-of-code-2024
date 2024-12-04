@@ -134,6 +134,9 @@ object Utils {
 
   def get(grid: ArrayBuffer[ArrayBuffer[Char]], pos: Vec2) = grid(pos.y.toInt)(pos.x.toInt)
 
+  def gridEquals(grid: ArrayBuffer[ArrayBuffer[Char]], pos: Vec2, char: Char): Boolean =
+    inRange(grid, pos) && get(grid, pos) == char
+
   def getMax(grid: ArrayBuffer[ArrayBuffer[Char]]): Vec2 =
     Vec2(grid.head.size, grid.size)
 
