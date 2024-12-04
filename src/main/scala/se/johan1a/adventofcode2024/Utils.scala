@@ -4,6 +4,8 @@ import scala.collection.mutable.ArrayBuffer
 
 object Utils {
 
+  type Grid = ArrayBuffer[ArrayBuffer[Char]]
+
   case class Vec2(x: Long, y: Long)
   case class Vec3(x: Long, y: Long, z: Long)
 
@@ -70,7 +72,7 @@ object Utils {
     groups
   }
 
-  def inRange(grid: ArrayBuffer[ArrayBuffer[Char]], pos: Vec2): Boolean = {
+  def inRange(grid: Grid, pos: Vec2): Boolean = {
     val min = Vec2(0, 0)
     val max = Vec2(grid.size, grid.head.size)
     inRange(pos, min, max)
@@ -128,19 +130,19 @@ object Utils {
       .filter(inRange(_, min, max))
   }
 
-  def makeGrid(lines: Seq[String]): ArrayBuffer[ArrayBuffer[Char]] = {
+  def makeGrid(lines: Seq[String]): Grid = {
     new ArrayBuffer().appendAll(lines.map(l => new ArrayBuffer().appendAll(l)))
   }
 
-  def get(grid: ArrayBuffer[ArrayBuffer[Char]], pos: Vec2) = grid(pos.y.toInt)(pos.x.toInt)
+  def get(grid: Grid, pos: Vec2) = grid(pos.y.toInt)(pos.x.toInt)
 
-  def gridEquals(grid: ArrayBuffer[ArrayBuffer[Char]], pos: Vec2, char: Char): Boolean =
+  def gridEquals(grid: Grid, pos: Vec2, char: Char): Boolean =
     inRange(grid, pos) && get(grid, pos) == char
 
-  def getMax(grid: ArrayBuffer[ArrayBuffer[Char]]): Vec2 =
+  def getMax(grid: Grid): Vec2 =
     Vec2(grid.head.size, grid.size)
 
-  def allPositions(grid: ArrayBuffer[ArrayBuffer[Char]]): Seq[Vec2] = {
+  def allPositions(grid: Grid): Seq[Vec2] = {
     0.until(grid.size).flatMap { y =>
       0.until(grid.head.size).map { x =>
         Vec2(x, y)
@@ -149,7 +151,7 @@ object Utils {
   }
 
   def straightPathsFromOutside(
-      grid: ArrayBuffer[ArrayBuffer[Char]]
+      grid: Grid
   ): Seq[Seq[Seq[Vec2]]] = {
     val ySize = grid.size
     val xSize = grid.head.size
@@ -191,7 +193,7 @@ object Utils {
   }
 
   def straightPathsFromPos(
-      grid: ArrayBuffer[ArrayBuffer[Char]],
+      grid: Grid,
       pos: Vec2
   ): Seq[Seq[Vec2]] = {
     val ySize = grid.size
