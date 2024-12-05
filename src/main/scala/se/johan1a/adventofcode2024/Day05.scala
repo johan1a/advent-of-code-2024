@@ -46,10 +46,7 @@ object Day05 {
 
   private def computeIndegrees(allDependencies: Map[Int, Set[Int]], updates: Seq[Int]) =
     allDependencies
-      .map { (n, neighbors) =>
-        val nbrIn = neighbors.filter(updates.contains).size
-        (n -> nbrIn)
-      }
+      .map((n, neighbors) => (n -> neighbors.filter(updates.contains).size))
       .toMap
       .withDefaultValue(0)
 
@@ -80,7 +77,7 @@ object Day05 {
     dependencies
   }
 
-  private def parseUpdates(lines: Seq[String]): Seq[Seq[Int]] = {
+  private def parseUpdates(lines: Seq[String]): Seq[Seq[Int]] =
     lines.map(l => l.split(",").map(_.toInt))
-  }
+
 }
