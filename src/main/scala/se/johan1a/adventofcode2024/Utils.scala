@@ -7,12 +7,16 @@ import scala.collection.mutable.ArrayBuffer
 object Utils:
 
   type Grid = ArrayBuffer[ArrayBuffer[Char]]
+  type Pos = Vec2
+
+  case class Dir(x: Long, y: Long)
 
   case class Vec2(x: Long, y: Long)
   case class Vec3(x: Long, y: Long, z: Long)
 
   def add(a: Vec2, b: Vec2): Vec2 = Vec2(a.x + b.x, a.y + b.y)
   def sub(a: Vec2, b: Vec2): Vec2 = Vec2(a.x - b.x, a.y - b.y)
+
   def sign(vec: Vec2): Vec2 = Vec2(vec.x.sign, vec.y.sign)
 
   def add(a: Vec3, b: Vec3): Vec3 = Vec3(a.x + b.x, a.y + b.y, a.z + b.z)
@@ -30,19 +34,21 @@ object Utils:
       case "R" =>
         Vec2(pos.x + 1, pos.y)
 
-  def turnRight(dir: Vec2): Vec2 =
-    dir match
-      case Vec2(1, 0)  => Vec2(0, 1)
-      case Vec2(0, 1)  => Vec2(-1, 0)
-      case Vec2(-1, 0) => Vec2(0, -1)
-      case Vec2(0, -1) => Vec2(1, 0)
+  def move(pos: Vec2, dir: Dir): Vec2 = Vec2(pos.x + dir.x, pos.y + dir.y)
 
-  def turnLeft(dir: Vec2): Vec2 =
+  def turnRight(dir: Dir): Dir =
     dir match
-      case Vec2(1, 0)  => Vec2(0, -1)
-      case Vec2(0, 1)  => Vec2(1, 0)
-      case Vec2(-1, 0) => Vec2(0, 1)
-      case Vec2(0, -1) => Vec2(-1, 0)
+      case Dir(1, 0)  => Dir(0, 1)
+      case Dir(0, 1)  => Dir(-1, 0)
+      case Dir(-1, 0) => Dir(0, -1)
+      case Dir(0, -1) => Dir(1, 0)
+
+  def turnLeft(dir: Dir): Dir =
+    dir match
+      case Dir(1, 0)  => Dir(0, -1)
+      case Dir(0, 1)  => Dir(1, 0)
+      case Dir(-1, 0) => Dir(0, 1)
+      case Dir(0, -1) => Dir(-1, 0)
 
   def manhattan(a: (Int, Int), b: (Int, Int)): Int =
     val diff = (a._1 - b._1, a._2 - b._2)
