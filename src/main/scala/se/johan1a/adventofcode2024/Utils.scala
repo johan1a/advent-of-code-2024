@@ -1,7 +1,6 @@
 package se.johan1a.adventofcode2024
 
 import scala.util.Try
-
 import scala.collection.mutable.ArrayBuffer
 
 object Utils:
@@ -11,7 +10,15 @@ object Utils:
 
   case class Dir(x: Long, y: Long)
 
-  case class Vec2(x: Long, y: Long)
+  case class Vec2(x: Long, y: Long):
+    def leftOf(other: Vec2): Boolean = x < other.x
+    def rightOf(other: Vec2): Boolean = x > other.x
+    def above(other: Vec2): Boolean = y < other.y
+    def below(other: Vec2): Boolean = y > other.y
+
+    def +(other: Vec2) = add(this, other)
+    def -(other: Vec2) = sub(this, other)
+
   case class Vec3(x: Long, y: Long, z: Long)
 
   def add(a: Vec2, b: Vec2): Vec2 = Vec2(a.x + b.x, a.y + b.y)
@@ -156,8 +163,15 @@ object Utils:
       )
       .headOption
 
+  def printGrid(grid: Grid) =
+    grid.foreach { line =>
+      println(line.mkString(""))
+    }
+
   def getMax(grid: Grid): Vec2 =
     Vec2(grid.head.size, grid.size)
+
+  def bottomRight(grid: Grid): Vec2 = Vec2(grid.head.size - 1, grid.size - 1)
 
   def allPositions(grid: Grid): Seq[Vec2] =
     0.until(grid.size).flatMap { y =>
@@ -166,69 +180,60 @@ object Utils:
       }
     }
 
-  def straightPathsFromOutside(
-      grid: Grid
-  ): Seq[Seq[Seq[Vec2]]] =
-    val ySize = grid.size
-    val xSize = grid.head.size
-    val leftToRight = 0
-      .until(ySize)
-      .map(y =>
-        0.until(xSize)
-          .map(x => Vec2(x, y))
-      )
-    val rightToLeft = 0
-      .until(ySize)
-      .map(y =>
-        0.until(xSize)
-          .reverse
-          .map(x => Vec2(x, y))
-      )
-    val topToBottom = 0
-      .until(xSize)
-      .map(x =>
-        0.until(ySize)
-          .map(y => Vec2(x, y))
-      )
-    val bottomToTop = 0
-      .until(xSize)
-      .map(x =>
-        0.until(ySize)
-          .reverse
-          .map(y => Vec2(x, y))
-      )
-    Seq(leftToRight, rightToLeft, topToBottom, bottomToTop)
+  def pairs[T](seq: Seq[T]): Seq[(T, T)] =
+    0.until(seq.size).flatMap { i =>
+      (i + 1).until(seq.size).map { j =>
+        (seq(i), seq(j))
+      }
+    }
 
-  def straightPathsFromPos(
-      grid: Grid,
-      pos: Vec2
-  ): Seq[Seq[Vec2]] =
-    val ySize = grid.size
-    val xSize = grid.head.size
+  def rotate(grid: Grid): Grid =
+    if grid.size != grid.head.size then throw new Exception("Sides must be equal")
+    val newGrid = ArrayBuffer.fill(grid.size)(ArrayBuffer.fill(grid.head.size)('?'))
+    val width = grid.size
+    0.to(width / 2).foreach { d =>
+      0.until(width - 2 * d).foreach { i =>
+        // top -> right
+        newGrid(d + i)(newGrid.size - 1 - d) = grid(d)(d + i)
 
-    val min = Vec2(0, 0)
-    val max = getMax(grid)
+        // right -> bottom
+        newGrid(newGrid.size - 1 - d)(newGrid.size - 1 - i - d) = grid(d + i)(newGrid.size - 1 - d)
 
-    val right = (pos.x + 1)
-      .until(xSize)
-      .map(x => Vec2(x, pos.y))
-      .filter(p => inRange(p, min, max))
+        // bottom -> left
+        newGrid(grid.size - 1 - d - i)(d) = grid(grid.size - 1 - d)(grid.size - 1 - d - i)
 
-    val left = 0
-      .until(pos.x.toInt)
-      .reverse
-      .map(x => Vec2(x, pos.y))
-      .filter(p => inRange(p, min, max))
+        // left -> top
+        newGrid(d)(d + i) = grid(grid.size - 1 - i - d)(d)
+      }
+    }
+    newGrid
 
-    val down = (pos.y + 1)
-      .until(ySize)
-      .map(y => Vec2(pos.x, y))
-      .filter(p => inRange(p, min, max))
+  // flip left - right
+  def flip(grid: Grid): Grid =
+    val newData = ArrayBuffer.fill(grid.size)(ArrayBuffer.fill(grid.size)('?'))
 
-    val up = 0
-      .until(pos.y.toInt)
-      .reverse
-      .map(y => Vec2(pos.x, y))
-      .filter(p => inRange(p, min, max))
+    grid.indices.map { y =>
+      grid.head.indices.map { x =>
+        newData(y)(newData.size - 1 - x) = grid(y)(x)
+      }
+    }
 
-    Seq(right, left, down, up)
+    newData
+
+  // Math sux amirite?!
+  def lcm(nn: Seq[Long]): Long =
+    var a = nn.head
+    var i = 1
+    while i < nn.size do
+      val b = nn(i)
+      a = lcm(a, b)
+      i += 1
+    a
+
+  def lcm(a: Long, b: Long): Long =
+    Math.abs(a * b) / gcd(a, b)
+
+  def gcd(a: Long, b: Long): Long =
+    if a == 0 && b == 0 then 0
+    else if b == 0 then a
+    else gcd(b, a % b)
