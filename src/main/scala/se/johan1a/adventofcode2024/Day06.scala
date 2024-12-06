@@ -28,31 +28,30 @@ object Day06 {
     seen.contains((pos, dir))
   }
 
-  def walk(grid: Grid, startPos: Vec2) = {
-    var pos = startPos
-    var dir = Vec2(0, -1)
-    var seen = Set[(Vec2, Vec2)]()
-    while (inRange(grid, pos) && !seen.contains((pos, dir))) {
-      seen = seen + ((pos, dir))
+  def walk(grid: Grid, pos: Vec2): (Set[(Vec2, Vec2)], Vec2, Vec2) =
+    walk(grid, Set(), pos, Vec2(0, -1))
+
+  def walk(grid: Grid, seen: Set[(Vec2, Vec2)], pos: Vec2, dir: Vec2): (Set[(Vec2, Vec2)], Vec2, Vec2) =
+    if (!inRange(grid, pos) || seen.contains((pos, dir))) {
+      (seen, pos, dir)
+    } else {
+      val newSeen = seen + ((pos, dir))
       val nextPos = add(pos, dir)
       getOpt(grid, nextPos) match {
         case Some('#') =>
-          dir = turn(dir)
+          walk(grid, newSeen, pos, turn(dir))
         case _ =>
-          pos = nextPos
+          walk(grid, newSeen, nextPos, dir)
       }
     }
-    (seen, pos, dir)
-  }
 
-  private def turn(dir: Vec2) = {
+  private def turn(dir: Vec2) =
     dir match {
       case Vec2(1, 0)  => Vec2(0, 1)
       case Vec2(0, 1)  => Vec2(-1, 0)
       case Vec2(-1, 0) => Vec2(0, -1)
       case Vec2(0, -1) => Vec2(1, 0)
     }
-  }
 
   def findStartPos(grid: Grid) = {
     var pos = Vec2(-1, -1)
