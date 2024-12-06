@@ -140,6 +140,8 @@ object Utils {
 
   def getOpt(grid: Grid, pos: Vec2) = Try(grid(pos.y.toInt)(pos.x.toInt)).toOption
 
+  def set(grid: Grid, pos: Vec2, char: Char) = grid(pos.y.toInt)(pos.x.toInt) = char
+
   def gridEquals(grid: Grid, pos: Vec2, char: Char): Boolean =
     inRange(grid, pos) && get(grid, pos) == char
 

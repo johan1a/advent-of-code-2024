@@ -6,4 +6,4 @@ target
 .session
 info
 .idea
-src/test/day*/input.txt
+src/test/resources/*/input.txt

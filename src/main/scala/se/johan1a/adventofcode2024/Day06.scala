@@ -7,10 +7,43 @@ object Day06 {
   def part1(input: Seq[String]): Int = {
     val grid = makeGrid(input)
     var pos = findStartPos(grid)
-    walk(grid, pos)
+    walk(grid, pos).size
   }
 
-  private def walk(grid: Grid, startPos: Vec2): Int = {
+  def part2(input: Seq[String]): Int = {
+    val grid = makeGrid(input)
+    var pos = findStartPos(grid)
+    val seen = walk(grid, pos)
+    seen.filter(producesLoop(grid, pos, seen.size, _)).size
+  }
+
+  def producesLoop(grid: Grid, startPos: Vec2, originalSeen: Int, obstacle: Vec2): Boolean = {
+    val original = get(grid, obstacle)
+    set(grid, obstacle, '#')
+
+    var pos = startPos
+    var dir = Vec2(0, -1)
+    var seen = Set[Vec2]()
+    var steps = 0
+    while (inRange(grid, pos) && steps <= seen.size * 2) {
+      seen = seen + pos
+      val nextPos = add(pos, dir)
+      getOpt(grid, nextPos) match {
+        case Some('#') =>
+          dir = turn(dir)
+          // println("turn\n")
+        case _ =>
+          pos = nextPos
+          steps = steps + 1
+          // println(pos)
+      }
+    }
+    set(grid, obstacle, original)
+    // println(s"steps $steps seen ${seen.size}, inRange ${inRange(grid, pos)}")
+    steps > seen.size * 2
+  }
+
+  def walk(grid: Grid, startPos: Vec2) = {
     var pos = startPos
     var dir = Vec2(0, -1)
     var seen = Set[Vec2]()
@@ -24,7 +57,7 @@ object Day06 {
           pos = nextPos
       }
     }
-    seen.size
+    seen
   }
 
   private def turn(dir:Vec2) = {
@@ -36,7 +69,7 @@ object Day06 {
     }
   }
 
-  private def findStartPos(grid: Grid) = {
+  def findStartPos(grid: Grid) = {
     var pos = Vec2(-1, -1)
     0.until(grid.size).foreach { i =>
       0.until(grid.head.size).foreach { j =>
@@ -46,9 +79,5 @@ object Day06 {
       }
     }
     pos
-  }
-
-  def part2(input: Seq[String]): Int = {
-    -1
   }
 }
