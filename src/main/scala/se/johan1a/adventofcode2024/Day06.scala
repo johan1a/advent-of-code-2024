@@ -31,15 +31,13 @@ object Day06 {
       getOpt(grid, nextPos) match {
         case Some('#') =>
           dir = turn(dir)
-          // println("turn\n")
         case _ =>
           pos = nextPos
           steps = steps + 1
-          // println(pos)
       }
     }
+
     set(grid, obstacle, original)
-    // println(s"steps $steps seen ${seen.size}, inRange ${inRange(grid, pos)}")
     steps > seen.size * 2
   }
 
