@@ -32,6 +32,22 @@ object Utils {
     }
   }
 
+  def turnRight(dir: Vec2): Vec2 =
+    dir match {
+      case Vec2(1, 0)  => Vec2(0, 1)
+      case Vec2(0, 1)  => Vec2(-1, 0)
+      case Vec2(-1, 0) => Vec2(0, -1)
+      case Vec2(0, -1) => Vec2(1, 0)
+    }
+
+  def turnLeft(dir: Vec2): Vec2 =
+    dir match {
+      case Vec2(1, 0)  => Vec2(0, -1)
+      case Vec2(0, 1)  => Vec2(1, 0)
+      case Vec2(-1, 0) => Vec2(0, 1)
+      case Vec2(0, -1) => Vec2(-1, 0)
+    }
+
   def manhattan(a: (Int, Int), b: (Int, Int)): Int = {
     val diff = (a._1 - b._1, a._2 - b._2)
     diff._1.abs + diff._2.abs

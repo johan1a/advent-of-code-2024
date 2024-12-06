@@ -39,18 +39,10 @@ object Day06 {
       val nextPos = add(pos, dir)
       getOpt(grid, nextPos) match {
         case Some('#') =>
-          walk(grid, newSeen, pos, turn(dir))
+          walk(grid, newSeen, pos, turnRight(dir))
         case _ =>
           walk(grid, newSeen, nextPos, dir)
       }
-    }
-
-  private def turn(dir: Vec2) =
-    dir match {
-      case Vec2(1, 0)  => Vec2(0, 1)
-      case Vec2(0, 1)  => Vec2(-1, 0)
-      case Vec2(-1, 0) => Vec2(0, -1)
-      case Vec2(0, -1) => Vec2(1, 0)
     }
 
   def findStartPos(grid: Grid): Vec2 = find(grid, '^').get
