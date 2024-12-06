@@ -58,10 +58,10 @@ object Day06 {
     seen
   }
 
-  private def turn(dir:Vec2) = {
+  private def turn(dir: Vec2) = {
     dir match {
-      case Vec2(1, 0) => Vec2(0, 1)
-      case Vec2(0, 1) => Vec2(-1, 0)
+      case Vec2(1, 0)  => Vec2(0, 1)
+      case Vec2(0, 1)  => Vec2(-1, 0)
       case Vec2(-1, 0) => Vec2(0, -1)
       case Vec2(0, -1) => Vec2(1, 0)
     }
