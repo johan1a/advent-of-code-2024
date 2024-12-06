@@ -23,22 +23,20 @@ object Day06 {
 
     var pos = startPos
     var dir = Vec2(0, -1)
-    var seen = Set[Vec2]()
-    var steps = 0
-    while (inRange(grid, pos) && steps <= seen.size * 2) {
-      seen = seen + pos
+    var seen = Set[(Vec2, Vec2)]()
+    while (inRange(grid, pos) && !seen.contains((pos, dir))) {
+      seen = seen + ((pos, dir))
       val nextPos = add(pos, dir)
       getOpt(grid, nextPos) match {
         case Some('#') =>
           dir = turn(dir)
         case _ =>
           pos = nextPos
-          steps = steps + 1
       }
     }
 
     set(grid, obstacle, original)
-    steps > seen.size * 2
+    seen.contains((pos, dir))
   }
 
   def walk(grid: Grid, startPos: Vec2) = {
