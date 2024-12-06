@@ -7,13 +7,14 @@ object Day06 {
   def part1(input: Seq[String]): Int = {
     val grid = makeGrid(input)
     var pos = findStartPos(grid)
-    walk(grid, pos).size
+    val (seen, _, _) = walk(grid, pos)
+    seen.map(_._1).size
   }
 
   def part2(input: Seq[String]): Int = {
     val grid = makeGrid(input)
     var pos = findStartPos(grid)
-    val seen = walk(grid, pos)
+    val seen = walk(grid, pos)._1.map(_._1)
     seen.filter(producesLoop(grid, pos, _)).size
   }
 
@@ -21,6 +22,13 @@ object Day06 {
     val original = get(grid, obstacle)
     set(grid, obstacle, '#')
 
+    val (seen, pos, dir) = walk(grid, startPos)
+
+    set(grid, obstacle, original)
+    seen.contains((pos, dir))
+  }
+
+  def walk(grid: Grid, startPos: Vec2) = {
     var pos = startPos
     var dir = Vec2(0, -1)
     var seen = Set[(Vec2, Vec2)]()
@@ -34,26 +42,7 @@ object Day06 {
           pos = nextPos
       }
     }
-
-    set(grid, obstacle, original)
-    seen.contains((pos, dir))
-  }
-
-  def walk(grid: Grid, startPos: Vec2) = {
-    var pos = startPos
-    var dir = Vec2(0, -1)
-    var seen = Set[Vec2]()
-    while (inRange(grid, pos)) {
-      seen = seen + pos
-      val nextPos = add(pos, dir)
-      getOpt(grid, nextPos) match {
-        case Some('#') =>
-          dir = turn(dir)
-        case _ =>
-          pos = nextPos
-      }
-    }
-    seen
+    (seen, pos, dir)
   }
 
   private def turn(dir: Vec2) = {
