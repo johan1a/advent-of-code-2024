@@ -1,5 +1,7 @@
 package se.johan1a.adventofcode2024
 
+import scala.util.Try
+
 import scala.collection.mutable.ArrayBuffer
 
 object Utils {
@@ -135,6 +137,8 @@ object Utils {
   }
 
   def get(grid: Grid, pos: Vec2) = grid(pos.y.toInt)(pos.x.toInt)
+
+  def getOpt(grid: Grid, pos: Vec2) = Try(grid(pos.y.toInt)(pos.x.toInt)).toOption
 
   def gridEquals(grid: Grid, pos: Vec2, char: Char): Boolean =
     inRange(grid, pos) && get(grid, pos) == char
