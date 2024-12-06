@@ -145,6 +145,16 @@ object Utils {
   def gridEquals(grid: Grid, pos: Vec2, char: Char): Boolean =
     inRange(grid, pos) && get(grid, pos) == char
 
+  def find(grid: Grid, char: Char): Option[Vec2] =
+    0.until(grid.size)
+      .flatMap(i =>
+        0.until(grid.head.size)
+          .filter(j => get(grid, Vec2(i, j)) == char)
+          .map(j => Vec2(i, j))
+          .headOption
+      )
+      .headOption
+
   def getMax(grid: Grid): Vec2 =
     Vec2(grid.head.size, grid.size)
 

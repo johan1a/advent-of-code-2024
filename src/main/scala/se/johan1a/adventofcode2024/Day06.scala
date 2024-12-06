@@ -53,15 +53,5 @@ object Day06 {
       case Vec2(0, -1) => Vec2(1, 0)
     }
 
-  def findStartPos(grid: Grid) = {
-    var pos = Vec2(-1, -1)
-    0.until(grid.size).foreach { i =>
-      0.until(grid.head.size).foreach { j =>
-        if (grid(i)(j) == '^') {
-          pos = Vec2(j, i)
-        }
-      }
-    }
-    pos
-  }
+  def findStartPos(grid: Grid): Vec2 = find(grid, '^').get
 }

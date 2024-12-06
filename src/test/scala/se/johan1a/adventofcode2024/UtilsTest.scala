@@ -1,6 +1,6 @@
 package se.johan1a.adventofcode2024
 
-import se.johan1a.adventofcode2024.Utils
+import se.johan1a.adventofcode2024.Utils.*
 
 class UtilsTest extends munit.FunSuite {
 
@@ -9,9 +9,17 @@ class UtilsTest extends munit.FunSuite {
 
     val expected = Seq[Long](0, 829, -4, 5)
 
-    val actual = Utils.numbers(input)
+    val actual = numbers(input)
 
     assertEquals(actual, expected)
+  }
+
+  test("find element in grid") {
+    val grid = makeGrid(Seq("123", "456", "789"))
+
+    val actual = find(grid, '8')
+
+    assertEquals(actual, Some(Vec2(1, 2)))
   }
 
 }
