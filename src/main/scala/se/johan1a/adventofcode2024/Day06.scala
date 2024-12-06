@@ -14,10 +14,10 @@ object Day06 {
     val grid = makeGrid(input)
     var pos = findStartPos(grid)
     val seen = walk(grid, pos)
-    seen.filter(producesLoop(grid, pos, seen.size, _)).size
+    seen.filter(producesLoop(grid, pos, _)).size
   }
 
-  def producesLoop(grid: Grid, startPos: Vec2, originalSeen: Int, obstacle: Vec2): Boolean = {
+  def producesLoop(grid: Grid, startPos: Vec2, obstacle: Vec2): Boolean = {
     val original = get(grid, obstacle)
     set(grid, obstacle, '#')
 

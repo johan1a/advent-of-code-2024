@@ -17,7 +17,7 @@ class Day06Test extends munit.FunSuite {
     val grid = makeGrid(getInput("day06/test.txt"))
     var pos = Day06.findStartPos(grid)
     val seen = Day06.walk(grid, pos)
-    val actual = Day06.producesLoop(grid, pos, seen.size, Vec2(3, 6))
+    val actual = Day06.producesLoop(grid, pos, Vec2(3, 6))
     assertEquals(actual, true)
   }
 
