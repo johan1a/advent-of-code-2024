@@ -2,7 +2,7 @@ package se.johan1a.adventofcode2024
 
 import se.johan1a.adventofcode2024.TestInputUtil.getInput
 
-class Day03Test extends munit.FunSuite {
+class Day03Test extends munit.FunSuite:
 
   test("Part 1 test") {
     assertEquals(Day03.part1(getInput("day03/test.txt")), 161L)
@@ -23,5 +23,3 @@ class Day03Test extends munit.FunSuite {
   test("Part 2") {
     assertEquals(Day03.part2(getInput("day03/input.txt")), 82868252L)
   }
-
-}
