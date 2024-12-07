@@ -1,7 +1,8 @@
 package se.johan1a.adventofcode2024
 
-import scala.util.Try
+import scala.annotation.tailrec
 import scala.collection.mutable.ArrayBuffer
+import scala.util.Try
 
 object Utils:
 
@@ -16,8 +17,8 @@ object Utils:
     def above(other: Vec2): Boolean = y < other.y
     def below(other: Vec2): Boolean = y > other.y
 
-    def +(other: Vec2) = add(this, other)
-    def -(other: Vec2) = sub(this, other)
+    def +(other: Vec2): Vec2 = add(this, other)
+    def -(other: Vec2): Vec2 = sub(this, other)
 
   case class Vec3(x: Long, y: Long, z: Long)
 
@@ -144,26 +145,26 @@ object Utils:
   def makeGrid(lines: Seq[String]): Grid =
     new ArrayBuffer().appendAll(lines.map(l => new ArrayBuffer().appendAll(l)))
 
-  def get(grid: Grid, pos: Vec2) = grid(pos.y.toInt)(pos.x.toInt)
+  def get(grid: Grid, pos: Vec2): Char = grid(pos.y.toInt)(pos.x.toInt)
 
-  def getOpt(grid: Grid, pos: Vec2) = Try(grid(pos.y.toInt)(pos.x.toInt)).toOption
+  def getOpt(grid: Grid, pos: Vec2): Option[Char] = Try(grid(pos.y.toInt)(pos.x.toInt)).toOption
 
-  def set(grid: Grid, pos: Vec2, char: Char) = grid(pos.y.toInt)(pos.x.toInt) = char
+  def set(grid: Grid, pos: Vec2, char: Char): Unit = grid(pos.y.toInt)(pos.x.toInt) = char
 
   def gridEquals(grid: Grid, pos: Vec2, char: Char): Boolean =
     inRange(grid, pos) && get(grid, pos) == char
 
   def find(grid: Grid, char: Char): Option[Vec2] =
-    0.until(grid.size)
+    grid.indices
       .flatMap(i =>
-        0.until(grid.head.size)
+        grid.head.indices
           .filter(j => get(grid, Vec2(i, j)) == char)
           .map(j => Vec2(i, j))
           .headOption
       )
       .headOption
 
-  def printGrid(grid: Grid) =
+  def printGrid(grid: Grid): Unit =
     grid.foreach { line =>
       println(line.mkString(""))
     }
@@ -174,14 +175,14 @@ object Utils:
   def bottomRight(grid: Grid): Vec2 = Vec2(grid.head.size - 1, grid.size - 1)
 
   def allPositions(grid: Grid): Seq[Vec2] =
-    0.until(grid.size).flatMap { y =>
-      0.until(grid.head.size).map { x =>
+    grid.indices.flatMap { y =>
+      grid.head.indices.map { x =>
         Vec2(x, y)
       }
     }
 
   def pairs[T](seq: Seq[T]): Seq[(T, T)] =
-    0.until(seq.size).flatMap { i =>
+    seq.indices.flatMap { i =>
       (i + 1).until(seq.size).map { j =>
         (seq(i), seq(j))
       }
@@ -233,6 +234,7 @@ object Utils:
   def lcm(a: Long, b: Long): Long =
     Math.abs(a * b) / gcd(a, b)
 
+  @tailrec
   def gcd(a: Long, b: Long): Long =
     if a == 0 && b == 0 then 0
     else if b == 0 then a
