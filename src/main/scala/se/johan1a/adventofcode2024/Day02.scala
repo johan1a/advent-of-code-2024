@@ -5,7 +5,8 @@ object Day02:
   def part1(input: Seq[String]): Int = parse(input).filter(isSafe).size
 
   private def isSafe(levels: Seq[Int]): Boolean =
-    if levels(0) == levels(1) then false
+    if levels(0) == levels(1) then
+      false
     else
       val firstSign = sign(levels(0), levels(1))
       levels

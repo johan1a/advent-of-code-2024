@@ -34,7 +34,8 @@ object Day07:
     (n, result)
 
   private def calculate2(n: Long, sum: Long, remaining: Seq[Long]): Boolean =
-    if remaining.isEmpty then n == sum
+    if remaining.isEmpty then
+      n == sum
     else
       val next = remaining.head
       calculate2(n, sum + next, remaining.tail)

@@ -19,7 +19,8 @@ object Day03:
         i = j
         tryParseMul(chars, i)
           .map { (num, j) =>
-            if enabled then sum += num
+            if enabled then
+              sum += num
             i = j
           }
           .getOrElse {

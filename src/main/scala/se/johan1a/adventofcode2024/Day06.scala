@@ -29,7 +29,8 @@ object Day06:
     walk(grid, Set(), pos, Dir(0, -1))
 
   def walk(grid: Grid, seen: Set[(Pos, Dir)], pos: Pos, dir: Dir): (Set[(Pos, Dir)], Pos, Dir) =
-    if !inRange(grid, pos) || seen.contains((pos, dir)) then (seen, pos, dir)
+    if !inRange(grid, pos) || seen.contains((pos, dir)) then
+      (seen, pos, dir)
     else
       val newSeen = seen + ((pos, dir))
       val nextPos = move(pos, dir)
