@@ -23,24 +23,23 @@ object Day07:
     (n, result)
 
   private def calculate(n: Long, sum: Long, remaining: Seq[Long]): Boolean =
-    if remaining.isEmpty then
-      n == sum
-    else
-      val next = remaining.head
-      calculate(n, sum + next, remaining.tail) || calculate(n, sum * next, remaining.tail)
+    remaining match
+      case Seq() => n == sum
+      case next +: tail =>
+        calculate(n, sum + next, tail)
+        || calculate(n, sum * next, tail)
 
   private def calculate2(n: Long, numbers: Seq[Long]): (Long, Boolean) =
     val result = calculate2(n, numbers.head, numbers.tail)
     (n, result)
 
   private def calculate2(n: Long, sum: Long, remaining: Seq[Long]): Boolean =
-    if remaining.isEmpty then
-      n == sum
-    else
-      val next = remaining.head
-      calculate2(n, sum + next, remaining.tail)
-      || calculate2(n, sum * next, remaining.tail)
-      || calculate2(n, combine(sum, next), remaining.tail)
+    remaining match
+      case Seq() => n == sum
+      case next +: tail =>
+        calculate2(n, sum + next, tail)
+        || calculate2(n, sum * next, tail)
+        || calculate2(n, combine(sum, next), tail)
 
   def combine(a: Long, b: Long) =
     (a.toString + b.toString).toLong
