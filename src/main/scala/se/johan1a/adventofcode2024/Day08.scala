@@ -50,14 +50,8 @@ object Day08:
     antinodes.filter(inRange(grid, _))
 
   private def getPairs(antennas: Seq[Antenna], antennaType: Char): Seq[(Antenna, Antenna)] =
-    var pairs = Seq[(Antenna, Antenna)]()
     val sameType = antennas.filter(_.char == antennaType)
-    sameType.indices.foreach { i =>
-      (i + 1).until(sameType.size).foreach { j =>
-        pairs = pairs :+ (sameType(i), sameType(j))
-      }
-    }
-    pairs
+    pairs(sameType)
 
   private def parse(input: Seq[String]) =
     val grid = makeGrid(input)
