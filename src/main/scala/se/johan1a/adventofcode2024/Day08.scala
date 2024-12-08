@@ -11,15 +11,15 @@ object Day08:
     getAntiNodes(grid, antennas).size
 
   def part2(input: Seq[String]): Int =
-    -1
+    val (grid, antennas) = parse(input)
+    getAntiNodes2(grid, antennas).size
 
   private def getAntiNodes(grid: Grid, antennas: Seq[Antenna]): Set[Vec2] =
     val types = antennas.map(_.char).distinct
     var antinodes = Set[Vec2]()
     types.foreach { antennaType =>
-      val pairs = getPairs(antennas, antennaType)
-      pairs.foreach { pair =>
-        val direction = getDirection(pair._1, pair._2)
+      getPairs(antennas, antennaType).foreach { pair =>
+        val direction = pair._2.pos - pair._1.pos
         val antinode0 = pair._2.pos + direction
         val antinode1 = pair._1.pos - direction
         antinodes = antinodes + antinode0
@@ -28,8 +28,26 @@ object Day08:
     }
     antinodes.filter(inRange(grid, _))
 
-  private def getDirection(a: Antenna, b: Antenna): Vec2 =
-    b.pos - a.pos
+  private def getAntiNodes2(grid: Grid, antennas: Seq[Antenna]): Set[Vec2] =
+    val types = antennas.map(_.char).distinct
+    var antinodes = Set[Vec2]()
+    types.foreach { antennaType =>
+      getPairs(antennas, antennaType).foreach { pair =>
+        val direction = pair._2.pos - pair._1.pos
+        var antinode = pair._2.pos
+        while (inRange(grid, antinode)) {
+          antinodes = antinodes + antinode
+          antinode = antinode + direction
+        }
+
+        antinode = pair._1.pos
+        while (inRange(grid, antinode)) {
+          antinodes = antinodes + antinode
+          antinode = antinode - direction
+        }
+      }
+    }
+    antinodes.filter(inRange(grid, _))
 
   private def getPairs(antennas: Seq[Antenna], antennaType: Char): Seq[(Antenna, Antenna)] =
     var pairs = Seq[(Antenna, Antenna)]()
