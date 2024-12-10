@@ -41,7 +41,7 @@ class Day09Test extends munit.FunSuite:
   }
 
   test("Part 2 test 1") {
-    assertEquals(Day09.part2(Seq("7951996395451")), BigInt(-1))
+    assertEquals(Day09.part2(Seq("7951996395451")), BigInt(2815))
   }
 
   // Too low 6379331450703

@@ -39,7 +39,7 @@ object Day09:
     var i = 0
     var j = line.size - 1
     var pos = 0
-    while i < line.size do
+    while i <= j do
       assert(sum >= 0)
       println(s"i $i j $j pos $pos")
 
@@ -58,46 +58,74 @@ object Day09:
         i += 1
         println(s"if i $i pos $pos")
       else
-        if i <= j then
-          val id = j / 2
-          var k = i
-          // keep track of max blcok size that didn't fit anywhere
-          val originalPos = pos
-          while k < line.size - 1 && line(k) < line(j) do
-            if k == i then
-              pos += line(k)
-            else
-              pos += original(k)
-            pos += original(k + 1)
-            k += 2
-          if k < line.size then
-            println(s"originalPos $originalPos pos $pos k $k line(k) ${line(k)}")
+        val id = j / 2
+        var k = i
+        // keep track of max blcok size that didn't fit anywhere
+        val originalPos = pos
+        while k < line.size - 1 && line(k) < line(j) do
+          if k == i then
+            pos += line(k)
           else
-            println(s"originalPos $originalPos pos $pos k $k")
-          if k < j then
-            while line(k) > 0 && line(j) > 0 do
-              line(k) -= 1
-              line(j) -= 1
-              assert(!used.contains(pos))
-              used = used + pos
-              sum += pos * id
-              println(s"pos $pos id $id i $i j $j k $k sum $sum")
-              pos += 1
-            if line(j) == 0 then
-              j -= 2
-          else
-            j -= 2
-          if i != k then
-            pos = originalPos
-          if i == k && line(k) == 0 then
-            i += 1
+            pos += original(k)
+          pos += original(k + 1)
+          k += 2
+        if k < line.size then
+          println(s"originalPos $originalPos pos $pos k $k line(k) ${line(k)}")
         else
-//          if (i == j + 1) then
-//            pos += line(i)
-//          else
-          pos += original(i)
+          println(s"originalPos $originalPos pos $pos k $k")
+        if k < j then
+          while line(k) > 0 && line(j) > 0 do
+            line(k) -= 1
+            line(j) -= 1
+            assert(!used.contains(pos))
+            used = used + pos
+            sum += pos * id
+            println(s"pos $pos id $id i $i j $j k $k sum $sum")
+            pos += 1
+          if line(j) == 0 then
+            j -= 2
+        else
+          j -= 2
+        if i != k then
+          pos = originalPos
+        if i == k && line(k) == 0 then
           i += 1
-          println(s"else i $i j $j pos $pos")
+
+    var n = line(i)
+    if n > 0 then
+      pos += n
+    else
+      n = original(i)
+      pos += n
+    i += 1
+    println(s"after i $i pos $pos n $n")
+
+    while i < line.size do
+      if i % 2 == 0 then
+        val id = i / 2
+        if line(i) == 0 then
+          pos += original(i)
+        else
+          0.until(line(i)).foreach { _ =>
+            sum += pos * id
+            assert(!used.contains(pos))
+            used = used + pos
+            println(s"pos $pos id $id i $i j $j k sum $sum")
+            pos += 1
+          }
+        i += 1
+        println(s"if i $i pos $pos")
+      else
+        //          if (i == j + 1) then
+        //            pos += line(i)
+        //          else
+        //          if line(i) == 0 then
+        //            pos += original(i)
+        //          else
+        pos += original(i)
+        i += 1
+        println(s"else i $i j $j pos $pos")
     val posSum = original.sum
+    assert(posSum == pos)
     println(s"i $i j $j pos line.size ${line.size} pos $pos posSum $posSum")
     sum
