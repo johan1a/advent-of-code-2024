@@ -62,15 +62,11 @@ object Day09:
         var k = i
         val originalPos = pos
         while k < line.size - 1 && line(k) < line(j) do
-          if k == i then
-            pos += line(k)
-          else
-            pos += original(k)
+          pos += line(k)
           pos += original(k + 1)
           k += 2
-
-        if  k < line.size && k != i then
-          pos += original(k) - line(k)
+          if (k<line.size) then
+            pos += original(k) - line(k)
 
         if k < line.size then
           println(s"originalPos $originalPos pos $pos k $k line(k) ${line(k)}")
@@ -119,12 +115,6 @@ object Day09:
         i += 1
         println(s"if i $i pos $pos")
       else
-        //          if (i == j + 1) then
-        //            pos += line(i)
-        //          else
-        //          if line(i) == 0 then
-        //            pos += original(i)
-        //          else
         pos += original(i)
         i += 1
         println(s"else i $i j $j pos $pos")
