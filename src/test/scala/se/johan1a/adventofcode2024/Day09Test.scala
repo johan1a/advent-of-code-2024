@@ -44,6 +44,10 @@ class Day09Test extends munit.FunSuite:
     assertEquals(Day09.part2(Seq("7951996395451")), BigInt(2815))
   }
 
+  test("Part 2 test 2") {
+    assertEquals(Day09.part2(Seq("7951893954519")), BigInt(3096))
+  }
+
   // Too low 6379331450703
   test("Part 2") {
     assertEquals(Day09.part2(getInput("day09/input.txt")), BigInt(-1))

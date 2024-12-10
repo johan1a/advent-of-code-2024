@@ -60,7 +60,6 @@ object Day09:
       else
         val id = j / 2
         var k = i
-        // keep track of max blcok size that didn't fit anywhere
         val originalPos = pos
         while k < line.size - 1 && line(k) < line(j) do
           if k == i then
@@ -69,6 +68,10 @@ object Day09:
             pos += original(k)
           pos += original(k + 1)
           k += 2
+
+        if  k < line.size && k != i then
+          pos += original(k) - line(k)
+
         if k < line.size then
           println(s"originalPos $originalPos pos $pos k $k line(k) ${line(k)}")
         else
