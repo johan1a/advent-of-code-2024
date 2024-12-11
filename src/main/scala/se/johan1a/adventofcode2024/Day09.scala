@@ -34,7 +34,7 @@ object Day09:
 
   def part2(input: Seq[String]): Long =
     val blocks = parse(input.head)
-    printBlocks(blocks)
+    //printBlocks(blocks)
     val nbrBlocks = blocks.size
     var i = 0
     var j = blocks.size - 1
@@ -50,7 +50,7 @@ object Day09:
       if freeSpace(blocks(i)) == 0 then
         i += 1
 
-    printBlocks(blocks)
+    //printBlocks(blocks)
     count(blocks)
 
   private def count(blocks: Array[Block]): Long =
