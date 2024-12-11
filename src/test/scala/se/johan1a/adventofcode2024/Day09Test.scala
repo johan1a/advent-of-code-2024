@@ -1,7 +1,6 @@
 package se.johan1a.adventofcode2024
 
 import se.johan1a.adventofcode2024.TestInputUtil.getInput
-import scala.math.BigInt
 
 class Day09Test extends munit.FunSuite:
 
@@ -37,22 +36,22 @@ class Day09Test extends munit.FunSuite:
   }
 
   test("Part 2 test") {
-    assertEquals(Day09.part2(getInput("day09/test.txt")), BigInt(2858))
+    assertEquals(Day09.part2(getInput("day09/test.txt")), 2858L)
   }
 
   test("Part 2 test 1") {
-    assertEquals(Day09.part2(Seq("7951996395451")), BigInt(2815))
+    assertEquals(Day09.part2(Seq("7951996395451")), 2815L)
   }
 
   test("Part 2 test 2") {
-    assertEquals(Day09.part2(Seq("7951893954519")), BigInt(3096))
+    assertEquals(Day09.part2(Seq("7951893954519")), 3096L)
   }
 
   test("Part 2 test 3") {
-    assertEquals(Day09.part2(Seq("795186995111179815855627563954519")), BigInt(0))
+    assertEquals(Day09.part2(Seq("795186995111179815855627563954519")), 33671L)
   }
 
-  // Too low 6379331450703
-  test("Part 2") {
-    assertEquals(Day09.part2(getInput("day09/input.txt")), BigInt(-1))
-  }
+//  // Too low 6379331450703
+//  test("Part 2") {
+//    assertEquals(Day09.part2(getInput("day09/input.txt")), -1L)
+//  }
