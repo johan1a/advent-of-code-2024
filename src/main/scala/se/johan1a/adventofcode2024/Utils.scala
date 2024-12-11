@@ -155,14 +155,15 @@ object Utils:
     inRange(grid, pos) && get(grid, pos) == char
 
   def find(grid: Grid, char: Char): Option[Vec2] =
+    findAll(grid, char).headOption
+
+  def findAll(grid: Grid, char: Char): Seq[Vec2] =
     grid.indices
       .flatMap(i =>
         grid.head.indices
           .filter(j => get(grid, Vec2(i, j)) == char)
           .map(j => Vec2(i, j))
-          .headOption
       )
-      .headOption
 
   def printGrid(grid: Grid): Unit =
     grid.foreach { line =>
