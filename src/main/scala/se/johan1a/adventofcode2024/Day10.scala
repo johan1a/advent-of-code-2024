@@ -41,4 +41,20 @@ object Day10:
     (grid, starts)
 
   def part2(input: Seq[String]): Int =
-    -1
+    val (grid, starts) = parse(input)
+    starts.map(pos =>
+      val n = search2(grid, pos)
+      n
+    ).sum
+
+  private def search2(grid: Grid, pos: Pos): Int =
+    val n = get(grid, pos)
+    if n == '9' then
+        1
+    else
+      neighbors(pos, includeDiagonals = false).filter(neighbor =>
+        inRange(grid, neighbor) && isNumeric(get(grid, neighbor)) && get(grid, neighbor).toString.toInt == n.toString
+          .toInt + 1
+      ).map { neighbor =>
+        search2(grid, neighbor)
+      }.sum
