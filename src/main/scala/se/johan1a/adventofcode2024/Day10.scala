@@ -50,7 +50,7 @@ object Day10:
   private def search2(grid: Grid, pos: Pos): Int =
     val n = get(grid, pos)
     if n == '9' then
-        1
+      1
     else
       neighbors(pos, includeDiagonals = false).filter(neighbor =>
         inRange(grid, neighbor) && isNumeric(get(grid, neighbor)) && get(grid, neighbor).toString.toInt == n.toString
