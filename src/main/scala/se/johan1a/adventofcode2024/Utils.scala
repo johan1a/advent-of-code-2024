@@ -9,7 +9,12 @@ object Utils:
   type Grid = ArrayBuffer[ArrayBuffer[Char]]
   type Pos = Vec2
 
-  case class Dir(x: Long, y: Long)
+  case class Dir(x: Long, y: Long):
+    override def toString: String = this match
+      case Left  => "Left"
+      case Right => "Right"
+      case Up    => "Up"
+      case Down  => "Down"
 
   case class Vec2(x: Long, y: Long):
     def leftOf(other: Vec2): Boolean = x < other.x
@@ -18,6 +23,7 @@ object Utils:
     def below(other: Vec2): Boolean = y > other.y
 
     def +(other: Vec2): Vec2 = add(this, other)
+    def +(other: Dir): Vec2 = add(this, Vec2(other.x, other.y))
     def -(other: Vec2): Vec2 = sub(this, other)
 
   case class Vec3(x: Long, y: Long, z: Long)
@@ -44,19 +50,24 @@ object Utils:
 
   def move(pos: Vec2, dir: Dir): Vec2 = Vec2(pos.x + dir.x, pos.y + dir.y)
 
+  val Right = Dir(1, 0)
+  val Left = Dir(-1, 0)
+  val Up = Dir(0, -1)
+  val Down = Dir(0, 1)
+
   def turnRight(dir: Dir): Dir =
     dir match
-      case Dir(1, 0)  => Dir(0, 1)
-      case Dir(0, 1)  => Dir(-1, 0)
-      case Dir(-1, 0) => Dir(0, -1)
-      case Dir(0, -1) => Dir(1, 0)
+      case Right => Down
+      case Down  => Left
+      case Left  => Up
+      case Up    => Right
 
   def turnLeft(dir: Dir): Dir =
     dir match
-      case Dir(1, 0)  => Dir(0, -1)
-      case Dir(0, 1)  => Dir(1, 0)
-      case Dir(-1, 0) => Dir(0, 1)
-      case Dir(0, -1) => Dir(-1, 0)
+      case Right => Up
+      case Up    => Left
+      case Left  => Down
+      case Down  => Right
 
   def manhattan(a: (Int, Int), b: (Int, Int)): Int =
     val diff = (a._1 - b._1, a._2 - b._2)
