@@ -181,6 +181,22 @@ object Utils:
       println(line.mkString(""))
     }
 
+  def printGrid(grid: Grid, pos: Pos, dir: Dir, maxX: Int, maxY: Int): Unit =
+    if inRange(grid, pos) then
+      val original = get(grid, pos)
+      val dirChar = dir match
+        case Up    => '^'
+        case Down  => 'v'
+        case Right => '>'
+        case Left  => '<'
+
+      set(grid, pos, dirChar)
+
+      grid.take(maxY).foreach { line =>
+        println(line.take(maxX).mkString(""))
+      }
+      set(grid, pos, original)
+
   def getMax(grid: Grid): Vec2 =
     Vec2(grid.head.size, grid.size)
 

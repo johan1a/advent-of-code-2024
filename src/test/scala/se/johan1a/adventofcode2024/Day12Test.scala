@@ -41,5 +41,5 @@ class Day12Test extends munit.FunSuite:
   }
 
    test("Part 2") {
-     assertEquals(Day12.part2(getInput("day12/input.txt")), -1)
+     assertEquals(Day12.part2(getInput("day12/input.txt")), 902742)
    }

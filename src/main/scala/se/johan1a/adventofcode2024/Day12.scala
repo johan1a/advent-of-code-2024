@@ -97,6 +97,9 @@ object Day12:
             assert(getOpt(grid, pos).forall(t => t != plantType))
 
             println(s"$pos $dir $nbrSides")
+            Utils.printGrid(grid, pos, dir, 80, 15)
+            println()
+
             val nextPosInFront = pos + dir
             val nextPosToTheLeft = getNextToTheLeft(grid, pos, dir)
             val nextPosToTheRight = getNextToTheRight(grid, pos, dir)
@@ -143,29 +146,29 @@ object Day12:
                 pos = pos + dir
                 dir = turnRight(dir)
                 pos = pos + dir
-                nbrSides+=1
+                nbrSides += 1
               case (_, true, false, false, false) if dir == Up =>
                 dir = turnLeft(dir)
                 nbrSides += 1
-              case (true, false, false, false, false) if dir == Down =>
+              case (true, false, false, false, false) =>
                 dir = turnLeft(dir)
                 nbrSides += 1
               case (_, false, false, false, false) if dir == Down =>
                 dir = turnLeft(dir)
                 nbrSides += 1
-              case (false, false, false, false, true) if dir == Down =>
+              case (false, false, false, false, true) =>
                 dir = turnRight(dir)
                 nbrSides += 1
               case (_, false, false, false, _) if dir == Down =>
                 dir = turnLeft(dir)
                 nbrSides += 1
-              case (false, true, false, false, false) if dir == Down =>
+              case (false, true, false, false, false) =>
                 dir = turnLeft(dir)
                 nbrSides += 1
               case (_, _, false, false, false) if dir == Down =>
                 dir = turnLeft(dir)
                 nbrSides += 1
-              case (false, false, true, false, false) if dir == Down =>
+              case (false, false, true, false, false) =>
                 pos = pos + dir
               case (_, false, true, false, false) if dir == Down =>
                 pos = pos + dir
@@ -174,19 +177,16 @@ object Day12:
               case (_, false, true, _, true) if dir == Down =>
                 nbrSides += 1
                 dir = turnRight(dir)
-              case (false, false, true, false, false) if dir == Right =>
+              case (false, false, true, true, true) =>
                 pos = pos + dir
-              case (false, false, true, true, true) if dir == Left =>
-                pos = pos + dir
-              case (false, false, true, false, false) if dir == Left =>
-                pos = pos + dir
-              case (false, false, true, false, false) if Dir == Up =>
-                pos = pos + dir
-              case (false, false, true, false, false) if dir == Up =>
-                pos = pos + dir
-              case (false, false, false, false, false) if dir == Left =>
+              case (false, false, false, false, false) =>
                 nbrSides += 1
                 dir = turnLeft(dir)
+              case (false, false, true, true, false) if dir == Right =>
+                pos = pos + dir
+                dir = turnRight(dir)
+                pos = pos + dir
+                nbrSides += 1
               case (false, false, true, _, _) if dir == Right =>
                 pos = pos + dir
               case (false, _, false, false, true) if dir == Left =>
@@ -194,50 +194,45 @@ object Day12:
                 dir = turnRight(dir)
               case (false, false, true, _, true) if dir == Up =>
                 pos = pos + dir
-              case (false, false, false, false, true) if dir == Up =>
-                // back to start
-                nbrSides += 1
-                dir = turnRight(dir)
-              case (false, true, false, false, false) if dir == Left =>
-                dir = turnLeft(dir)
-                nbrSides += 1
-              case (false, true, true, false, false) if dir == Up =>
+              case (false, true, true, false, false) =>
                 pos = pos + dir
-              case (true, false, false, false, false) if dir == Up =>
-                dir = turnLeft(dir)
-                nbrSides += 1
-              case (true, false, true, false, false) if dir == Left =>
+              case (true, false, true, false, false) =>
                 pos = pos + dir
-              case (false, true, false, false, false) if dir == Right =>
-                dir = turnLeft(dir)
-                nbrSides += 1
-              case (true, false, true, false, false) if dir == Right =>
-                pos = pos + dir
-              case (true, false, true, true, false) if dir == Left =>
+              case (true, false, true, true, false) =>
                 pos = pos + dir
                 dir = turnRight(dir)
                 pos = pos + dir
                 nbrSides += 1
-              case (false, false, false, false, false) if dir == Up =>
-                // Back to start in inner
-                dir = turnLeft(dir)
-                nbrSides += 1
-              case (true, false, false, false, false) if dir == Left =>
-                dir = turnLeft(dir)
-                nbrSides += 1
-              case (_, _, true, false, false) if dir == Down =>
+              case (_, _, true, false, false) =>
                 pos = pos + dir
-              case (_, _, true, false, false) if dir == Right =>
-                pos = pos + dir
-              case (_, _, true, false, false) if dir == Up =>
-                pos = pos + dir
-              case (_, _, true, false, false) if dir == Left =>
-                pos = pos + dir
-              case (false, false, true, true, false) if dir == Left =>
+              case (false, false, true, true, false) =>
                 pos = pos + dir
                 dir = turnRight(dir)
                 pos = pos + dir
-                nbrSides+=1
+                nbrSides += 1
+              case (false, true, false, true, false) =>
+                pos = pos + dir
+                dir = turnRight(dir)
+                pos = pos + dir
+                nbrSides += 1
+              case (false, true, true, true, false) =>
+                pos = pos + dir
+                dir = turnRight(dir)
+                pos = pos + dir
+                nbrSides += 1
+              case (true, true, false, false, false) =>
+                dir = turnLeft(dir)
+                nbrSides += 1
+              case (true, true, false, true, false) =>
+                pos = pos + dir
+                dir = turnRight(dir)
+                pos = pos + dir
+                nbrSides += 1
+              case (true, true, true, true, false) =>
+                pos = pos + dir
+                dir = turnRight(dir)
+                pos = pos + dir
+                nbrSides += 1
               case _ => ???
 
         println(s"$plantType - nbrSides: $nbrSides")
