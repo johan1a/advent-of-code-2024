@@ -3,7 +3,6 @@ package se.johan1a.adventofcode2024
 import se.johan1a.adventofcode2024.Utils.*
 
 import java.math.{MathContext, RoundingMode}
-import java.net.URLEncoder
 
 object Day13:
 
@@ -17,34 +16,9 @@ object Day13:
       best(machine)
     ).map(_.getOrElse(0)).sum
 
-  val precision = BigDecimal("0.00000000000000000000000000001")
-  val mc = MathContext(128, RoundingMode.HALF_EVEN)
+  private val mc = MathContext(42, RoundingMode.HALF_EVEN)
 
   def part2(input: Seq[String], k: Long = 10000000000000L): BigInt =
-    // Button A: X+94, Y+34
-    // Button B: X+22, Y+67
-    // Prize: X=10000000008400, Y=10000000005400
-
-    // 10000000008400 = a * 94 + b * 22
-    // 10000000005400 = a * 34 + b * 67
-
-    // 10000000008400 - b * 22 = a * 94
-    // (10000000008400 - b * 22)/94 = a
-
-    // 10000000005400 = a * 34 + b * 67
-    // 10000000005400 = (10000000008400 - b * 22)/94 * 34 + b * 67
-    // 10000000005400 = 10000000008400/94*34 - b * 22/94 * 34 + b * 67
-    // 10000000005400 = 10000000008400/94*34 + b * 67 - b * 22/94 * 34
-    // 10000000005400 = 10000000008400/94*34 + b * (67 - 22/94 * 34)
-    // 10000000005400 - 10000000008400/94*34 = b * (67 - 22/94 * 34)
-    // (10000000005400 - 10000000008400/94*34) / (67 - 22/94 * 34) = b
-    // b = (10000000005400 - 10000000008400 / 94*34) / (67 - 22 / 94 * 34)
-    // b = (prizeY - prizeX / aX * aY) / (bY - bX / aX * aY)
-
-    // prizeX = a * aX + b * bX
-    // prizeX - b * bx = a * aX
-    // (prizeX - b * bx) / aX = a
-    // a = (prizeX - b * bx) / aX
     parse(input).map { machine =>
       val prize = machine.prize
       val a = machine.a
@@ -56,41 +30,12 @@ object Day13:
       val bX = BigDecimal(b.x, mc)
       val bY = BigDecimal(b.y, mc)
 
-      // b = (prizeY - prizeX / aX * aY) / (bY - bX / aX * aY)
-      // a = (prizeX - b * bx) / aX
-      val k0 = prizeX / aX
-
-      val k1 = bX / aX
-      val k2 = k0 * aY
-      val k3 = k1 * aY
-      val k4 = prizeY - k2
-      val k5 = bY - k3
-      val nbrB = k4 / k5
-      val k6 = nbrB * bX
-      val k7 = prizeX - k6
-      val nbrA = k7 / aX
-
-      val bs = s"($prizeY-$prizeX/$aX*$aY)/($bY-$bX/$aX*$aY)"
-      val bQuery = URLEncoder.encode(bs, "UTF-8")
-
-      val as = s"($prizeX-${nbrB.toBigInt}*$bX)/$aX"
-      val aQuery = URLEncoder.encode(as, "UTF-8")
-      println(s"\na $nbrA b $nbrB")
-//      println(s"a: https://duckduckgo.com/?q=$aQuery")
-//      println(s"b: https://duckduckgo.com/?q=$bQuery")
-      println(s"a: https://www.wolframalpha.com/input?i=$aQuery")
-      println(s"b: https://www.wolframalpha.com/input?i=$bQuery")
-
-//      val large = 10000000000000L
-//      val ppX = BigDecimal(prize.x)
-//      val ppY = BigDecimal(prize.y)
-//      val b2 = (large/10000L) / ((bY - bX / aX * aY)/10000L) + (ppY - (large/100000L) / (aX/100000) * aY - ppX / aX * aY) / (bY - bX / aX * aY)
-//      val a2 = large / aX + ppX / aX - b2 * bX / aX
+      val nbrB = (prizeY - prizeX / aX * aY) / (bY - bX / aX * aY)
+      val nbrA = (prizeX - nbrB * bX) / aX
 
       if Seq(nbrA, nbrB).exists(d => !isInteger(d)) then
         BigInt(0)
       else
-        println(s"a: $nbrA b: $nbrB")
         3 * round(nbrA) + round(nbrB)
     }.sum
 
@@ -101,6 +46,8 @@ object Day13:
     else
       d.toBigInt + 1
     result
+
+  val precision = BigDecimal("0.00000000000000000000000000001", mc)
 
   private def isInteger(nbrA: BigDecimal) =
     val remainder = nbrA.remainder(1).abs
@@ -147,5 +94,27 @@ object Day13:
       Machine(aDiff, bDiff, prizePos)
     }
 
-//
+// Button A: X+94, Y+34
+// Button B: X+22, Y+67
+// Prize: X=10000000008400, Y=10000000005400
+
+// 10000000008400 = a * 94 + b * 22
+// 10000000005400 = a * 34 + b * 67
+
+// 10000000008400 - b * 22 = a * 94
+// (10000000008400 - b * 22)/94 = a
+
+// 10000000005400 = a * 34 + b * 67
+// 10000000005400 = (10000000008400 - b * 22)/94 * 34 + b * 67
+// 10000000005400 = 10000000008400/94*34 - b * 22/94 * 34 + b * 67
+// 10000000005400 = 10000000008400/94*34 + b * 67 - b * 22/94 * 34
+// 10000000005400 = 10000000008400/94*34 + b * (67 - 22/94 * 34)
+// 10000000005400 - 10000000008400/94*34 = b * (67 - 22/94 * 34)
+// (10000000005400 - 10000000008400/94*34) / (67 - 22/94 * 34) = b
+// b = (10000000005400 - 10000000008400 / 94*34) / (67 - 22 / 94 * 34)
 // b = (prizeY - prizeX / aX * aY) / (bY - bX / aX * aY)
+
+// prizeX = a * aX + b * bX
+// prizeX - b * bx = a * aX
+// (prizeX - b * bx) / aX = a
+// a = (prizeX - b * bx) / aX
