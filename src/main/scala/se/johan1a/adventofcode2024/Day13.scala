@@ -14,8 +14,62 @@ object Day13:
       best(machine)
     ).map(_.getOrElse(0)).sum
 
-  def part2(input: Seq[String]): Int =
-    -1
+  val precision = BigDecimal("0.000000000000001")
+
+  def part2(input: Seq[String], k: Long = 10000000000000L): BigInt =
+    // Button A: X+94, Y+34
+    // Button B: X+22, Y+67
+    // Prize: X=10000000008400, Y=10000000005400
+
+    // 10000000008400 = a * 94 + b * 22
+    // 10000000005400 = a * 34 + b * 67
+
+    // 10000000008400 - b * 22 = a * 94
+    // (10000000008400 - b * 22)/94 = a
+
+    // 10000000005400 = a * 34 + b * 67
+    // 10000000005400 = (10000000008400 - b * 22)/94 * 34 + b * 67
+    // 10000000005400 = 10000000008400/94*34 - b * 22/94 * 34 + b * 67
+    // 10000000005400 = 10000000008400/94*34 + b * 67 - b * 22/94 * 34
+    // 10000000005400 = 10000000008400/94*34 + b * (67 - 22/94 * 34)
+    // 10000000005400 - 10000000008400/94*34 = b * (67 - 22/94 * 34)
+    // (10000000005400 - 10000000008400/94*34) / (67 - 22/94 * 34) = b
+    // b = (10000000005400 - 10000000008400 / 94*34) / (67 - 22 / 94 * 34)
+    // b = (prizeY - prizeX / aX * aY) / (bY - bX / aX * aY)
+
+    // prizeX = a * aX + b * bX
+    // prizeX - b * bx = a * aX
+    // (prizeX - b * bx) / aX = a
+    // a = (prizeX - b * bx) / aX
+    parse(input).map { machine =>
+      val prize = machine.prize
+      val a = machine.a
+      val b = machine.b
+      val prizeX = BigDecimal(prize.x + k)
+      val prizeY = BigDecimal(prize.y + k)
+      val aX = BigDecimal(a.x)
+      val aY = BigDecimal(a.y)
+      val bX = BigDecimal(b.x)
+      val bY = BigDecimal(b.y)
+
+      val k0 = prizeX / aX
+      val k1 = bX / aX
+      val k2 = k0 * aY
+      val k3 = k1 * aY
+      val k4 = prizeY - k2
+      val k5 = bY - k3
+      val nbrB = k4 / k5
+      val k6 = nbrB * bX
+      val k7 = prizeX - k6
+      val nbrA = k7 / aX
+      if Seq(k0, k2, k3, k4, k5, k6, k7, nbrA, nbrB).exists(d => !isInteger(d)) then
+        BigInt(0)
+      else
+        println(s"a: $nbrA b: $nbrB")
+        3 * nbrA.rounded.toBigInt + nbrB.rounded.toBigInt
+    }.sum
+
+  private def isInteger(nbrA: BigDecimal) = nbrA.remainder(1).abs <= precision
 
   private def best(
       machine: Machine,
