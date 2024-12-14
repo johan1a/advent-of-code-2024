@@ -33,6 +33,8 @@ class Day13Test extends munit.FunSuite:
   // Wrong    66242756861809
   // Wrong    2370801832749
   // Wrong    2949033126401
+  // Wrong    67216329353816
+  // Wrong    69242541924166
   test("Part 2") {
-    assertEquals(Day13.part2(getInput("day13/input.txt")), BigInt(-1))
+    assertEquals(Day13.part2(getInput("day13/input.txt")), BigInt(76358113886726L))
   }

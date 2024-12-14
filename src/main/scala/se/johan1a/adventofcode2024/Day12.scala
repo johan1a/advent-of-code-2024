@@ -43,14 +43,13 @@ object Day12:
     allPositions(grid).filterNot(seen.contains).map(pos =>
       val (area, perimeter, _) = calculate(grid, pos)
       if area > 0 then
-        val plantType = get(grid, pos)
-        val nbrSides = getNbrSides(grid, perimeter, plantType)
+        val nbrSides = getNbrSides(grid, perimeter)
         area * nbrSides
       else
         0
     ).sum
 
-  private def getNbrSides(grid: Grid, perimeter: Set[Pos], plantType: Char) =
+  private def getNbrSides(grid: Grid, perimeter: Set[Pos]) =
     var seen = Set[(Pos, Dir)]()
     var nbrSides = 0
     var first = true
@@ -67,10 +66,8 @@ object Day12:
           while !seen.contains((pos, dir)) do
             seen = seen + ((pos, dir))
 
-            val nextPosInFront = pos + dir
-            val nextPosToTheRight = getNextToTheRight(grid, pos, dir)
-            val nextInFront = perimeter.contains(nextPosInFront)
-            val nextRight = perimeter.contains(nextPosToTheRight)
+            val nextInFront = perimeter.contains(pos + dir)
+            val nextRight = perimeter.contains(getNextToTheRight(grid, pos, dir))
             val rightOf = perimeter.contains(getPosToTheRight(grid, pos, dir))
 
             (nextInFront, nextRight, rightOf) match

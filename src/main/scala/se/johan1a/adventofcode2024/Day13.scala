@@ -2,6 +2,9 @@ package se.johan1a.adventofcode2024
 
 import se.johan1a.adventofcode2024.Utils.*
 
+import java.math.{MathContext, RoundingMode}
+import java.net.URLEncoder
+
 object Day13:
 
   case class Machine(a: Vec2, b: Vec2, prize: Pos)
@@ -14,7 +17,8 @@ object Day13:
       best(machine)
     ).map(_.getOrElse(0)).sum
 
-  val precision = BigDecimal("0.000000000000001")
+  val precision = BigDecimal("0.00000000000000000000000000001")
+  val mc = MathContext(128, RoundingMode.HALF_EVEN)
 
   def part2(input: Seq[String], k: Long = 10000000000000L): BigInt =
     // Button A: X+94, Y+34
@@ -45,14 +49,17 @@ object Day13:
       val prize = machine.prize
       val a = machine.a
       val b = machine.b
-      val prizeX = BigDecimal(prize.x + k)
-      val prizeY = BigDecimal(prize.y + k)
-      val aX = BigDecimal(a.x)
-      val aY = BigDecimal(a.y)
-      val bX = BigDecimal(b.x)
-      val bY = BigDecimal(b.y)
+      val prizeX = BigDecimal(prize.x + k, mc)
+      val prizeY = BigDecimal(prize.y + k, mc)
+      val aX = BigDecimal(a.x, mc)
+      val aY = BigDecimal(a.y, mc)
+      val bX = BigDecimal(b.x, mc)
+      val bY = BigDecimal(b.y, mc)
 
+      // b = (prizeY - prizeX / aX * aY) / (bY - bX / aX * aY)
+      // a = (prizeX - b * bx) / aX
       val k0 = prizeX / aX
+
       val k1 = bX / aX
       val k2 = k0 * aY
       val k3 = k1 * aY
@@ -62,14 +69,46 @@ object Day13:
       val k6 = nbrB * bX
       val k7 = prizeX - k6
       val nbrA = k7 / aX
-      if Seq(k0, k2, k3, k4, k5, k6, k7, nbrA, nbrB).exists(d => !isInteger(d)) then
+
+      val bs = s"($prizeY-$prizeX/$aX*$aY)/($bY-$bX/$aX*$aY)"
+      val bQuery = URLEncoder.encode(bs, "UTF-8")
+
+      val as = s"($prizeX-${nbrB.toBigInt}*$bX)/$aX"
+      val aQuery = URLEncoder.encode(as, "UTF-8")
+      println(s"\na $nbrA b $nbrB")
+//      println(s"a: https://duckduckgo.com/?q=$aQuery")
+//      println(s"b: https://duckduckgo.com/?q=$bQuery")
+      println(s"a: https://www.wolframalpha.com/input?i=$aQuery")
+      println(s"b: https://www.wolframalpha.com/input?i=$bQuery")
+
+//      val large = 10000000000000L
+//      val ppX = BigDecimal(prize.x)
+//      val ppY = BigDecimal(prize.y)
+//      val b2 = (large/10000L) / ((bY - bX / aX * aY)/10000L) + (ppY - (large/100000L) / (aX/100000) * aY - ppX / aX * aY) / (bY - bX / aX * aY)
+//      val a2 = large / aX + ppX / aX - b2 * bX / aX
+
+      if Seq(nbrA, nbrB).exists(d => !isInteger(d)) then
         BigInt(0)
       else
         println(s"a: $nbrA b: $nbrB")
-        3 * nbrA.rounded.toBigInt + nbrB.rounded.toBigInt
+        3 * round(nbrA) + round(nbrB)
     }.sum
 
-  private def isInteger(nbrA: BigDecimal) = nbrA.remainder(1).abs <= precision
+  private def round(d: BigDecimal): BigInt =
+    val remainder = d.remainder(1).abs
+    val result = if remainder < 0.5 then
+      d.toBigInt
+    else
+      d.toBigInt + 1
+    result
+
+  private def isInteger(nbrA: BigDecimal) =
+    val remainder = nbrA.remainder(1).abs
+    val result = if remainder < 0.5 then
+      remainder <= precision
+    else
+      (1 - remainder) <= precision
+    result
 
   private def best(
       machine: Machine,
@@ -107,3 +146,6 @@ object Day13:
       val prizePos = Vec2(prize.head, prize.last)
       Machine(aDiff, bDiff, prizePos)
     }
+
+//
+// b = (prizeY - prizeX / aX * aY) / (bY - bX / aX * aY)
