@@ -30,7 +30,6 @@ object Day13:
       val result = if nbrAPresses > 100 || nbrBPresses > 100 || pos.x > machine.prize.x || pos.y > machine.prize.y then
         None
       else if pos == machine.prize then
-        println(s"found solution with cost $cost, $nbrAPresses a presses, $nbrBPresses bPresses")
         Some(cost)
       else
         val pressA = best(machine, pos + machine.a, 3 + cost, nbrAPresses + 1, nbrBPresses)
