@@ -82,10 +82,10 @@ object Day12:
               case (_, _, true) =>
                 nbrSides += 1
                 dir = turnRight(dir)
-              case (false, false, false) =>
+              case (false, _, _) =>
                 dir = turnLeft(dir)
                 nbrSides += 1
-              case (_, false, _) =>
+              case _ =>
                 pos = pos + dir
       }
     nbrSides
