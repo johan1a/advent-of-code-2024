@@ -1,6 +1,5 @@
 package se.johan1a.adventofcode2024
 
-import se.johan1a.adventofcode2024
 import se.johan1a.adventofcode2024.Utils.*
 
 object Day12:
@@ -11,7 +10,7 @@ object Day12:
     val grid = makeGrid(input)
     seen = Set[Pos]()
     allPositions(grid).filterNot(seen.contains).map(pos =>
-      val (area, perimeter, nbrPerimeter) = calculate(grid, pos)
+      val (area, _, nbrPerimeter) = calculate(grid, pos)
       area * nbrPerimeter
     ).sum
 
@@ -32,24 +31,20 @@ object Day12:
           .map(d => pos + d).foreach(neighbor =>
             if getOpt(grid, neighbor).contains(plantType) then
               queue = queue :+ neighbor
-            else if isPerimiter(grid, plantType, neighbor) then
+            else if !inRange(grid, neighbor) || get(grid, neighbor) != plantType then
               perimeter = perimeter + neighbor
               nbrPerimeter += 1
           )
     (area, perimeter, nbrPerimeter)
 
-  private def isPerimiter(grid: Grid, plantType: Char, neighbor: Pos) =
-    !inRange(grid, neighbor) || get(grid, neighbor) != plantType
-
   def part2(input: Seq[String]): Int =
     val grid = makeGrid(input)
     seen = Set[Pos]()
     allPositions(grid).filterNot(seen.contains).map(pos =>
-      val (area, perimiter, _) = calculate(grid, pos)
+      val (area, perimeter, _) = calculate(grid, pos)
       if area > 0 then
         val plantType = get(grid, pos)
-        val nbrSides = getNbrSides(grid, perimiter, plantType)
-
+        val nbrSides = getNbrSides(grid, perimeter, plantType)
         area * nbrSides
       else
         0
