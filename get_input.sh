@@ -40,9 +40,7 @@ if [ "$currentDateTimeSeconds" -lt "$minDateTimeSeconds" ];
   exit 1
 end
 
-set existingInputFileSize (wc -l ./src/test/resources/day$paddedDay/input.txt | awk '{print $1}')
-
-if [ $existingInputFileSize -eq "0" ];
+if [ ! -f ./src/test/resources/day$paddedDay/input.txt ];
   echo Downloading input...
   http "https://adventofcode.com/$year/day/$day/input" cookie:session=$session User-Agent:$userAgent > ./src/test/resources/day$paddedDay/input.txt
   echo Done
