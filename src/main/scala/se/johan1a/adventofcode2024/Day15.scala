@@ -1,6 +1,5 @@
 package se.johan1a.adventofcode2024
 
-import se.johan1a.adventofcode2024.Day15.canMoveTo
 import se.johan1a.adventofcode2024.Utils.*
 
 import scala.collection.mutable.ArrayBuffer
@@ -12,7 +11,6 @@ object Day15:
     var pos = start
     moves.foreach { move =>
       pos = applyMove(grid, pos, move)
-      // orintGrid(grid)
     }
     countGps(grid)
 
@@ -51,16 +49,10 @@ object Day15:
   def part2(input: Seq[String]): Long =
     val (smallGrid, moves, smallGridStart) = parse(input)
     val grid = enlargen(smallGrid)
-    printGrid(grid)
     val start = Vec2(smallGridStart.x * 2, smallGridStart.y)
     var pos = start
-    var i = 0
     moves.foreach { move =>
-      println()
-      println(s"$i next move: $move")
-      printGrid(grid, '@') //104
       pos = applyMove2(grid, pos, move)
-      i += 1
     }
     countGps(grid)
 
@@ -74,13 +66,7 @@ object Day15:
         set(grid, pos, '.')
         movedToPos = nextPos
       case '#' =>
-      case '[' =>
-        if canMoveTo(grid, nextPos, dir) then
-          push(grid, nextPos, dir)
-          set(grid, nextPos, '@')
-          set(grid, pos, '.')
-          movedToPos = nextPos
-      case ']' =>
+      case ch if ch == '[' || ch == ']'  =>
         if canMoveTo(grid, nextPos, dir) then
           push(grid, nextPos, dir)
           set(grid, nextPos, '@')

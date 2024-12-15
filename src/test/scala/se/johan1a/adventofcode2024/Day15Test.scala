@@ -9,7 +9,7 @@ class Day15Test extends munit.FunSuite:
   }
 
   test("Part 1 test") {
-    assertEquals(Day15.part1(getInput("day15/test0.txt")), 10092L)
+    assertEquals(Day15.part1(getInput("day15/test1.txt")), 10092L)
   }
 
   test("Part 1") {
