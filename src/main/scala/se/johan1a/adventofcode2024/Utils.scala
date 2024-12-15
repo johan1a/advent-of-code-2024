@@ -164,7 +164,8 @@ object Utils:
   def makeGrid(lines: Seq[String]): Grid =
     new ArrayBuffer().appendAll(lines.map(l => new ArrayBuffer().appendAll(l)))
 
-  def get(grid: Grid, pos: Vec2): Char = grid(pos.y.toInt)(pos.x.toInt)
+  def get(grid: Grid, pos: Vec2): Char =
+    grid(pos.y.toInt)(pos.x.toInt)
 
   def getOpt(grid: Grid, pos: Vec2): Option[Char] = Try(grid(pos.y.toInt)(pos.x.toInt)).toOption
 
@@ -178,15 +179,26 @@ object Utils:
 
   def findAll(grid: Grid, char: Char): Seq[Vec2] =
     grid.indices
-      .flatMap(i =>
+      .flatMap(y =>
         grid.head.indices
-          .filter(j => get(grid, Vec2(i, j)) == char)
-          .map(j => Vec2(i, j))
+          .filter(x => get(grid, Vec2(x, y)) == char)
+          .map(x => Vec2(x, y))
       )
 
   def printGrid(grid: Grid): Unit =
     grid.foreach { line =>
       println(line.mkString(""))
+    }
+
+  def printGrid(grid: Grid, target: Char, dx: Int = 10, dy: Int = 5): Unit =
+    val pos = find(grid, target).get
+    (pos.y - dy).until(pos.y + dy).foreach { y =>
+      if y >= 0 && y < grid.size then
+        (pos.x - dx).until(pos.x + dx).foreach { x =>
+          if x >= 0 && x < grid.head.size then
+            print(grid(y.toInt)(x.toInt))
+        }
+        println()
     }
 
   def printGrid(grid: Grid, pos: Pos, dir: Dir, maxX: Int, maxY: Int): Unit =
