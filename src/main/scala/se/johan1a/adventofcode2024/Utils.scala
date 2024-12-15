@@ -16,6 +16,14 @@ object Utils:
       case Up    => "Up"
       case Down  => "Down"
 
+  object Dir:
+    def fromChar(char: Char): Dir =
+      char match
+        case '>' => Right
+        case '<' => Left
+        case '^' => Up
+        case 'v' => Down
+
   case class Vec2(x: Long, y: Long):
     def leftOf(other: Vec2): Boolean = x < other.x
     def rightOf(other: Vec2): Boolean = x > other.x
