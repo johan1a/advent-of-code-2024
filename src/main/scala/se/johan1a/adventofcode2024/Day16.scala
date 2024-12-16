@@ -12,12 +12,21 @@ object Day16:
     val end = find(grid, 'E').get
     shortestPath(grid, start, end)._1
 
+  def part2(input: Seq[String]): Int =
+    val grid = makeGrid(input)
+    val start = find(grid, 'S').get
+    val end = find(grid, 'E').get
+    val (shortestPathLength, cost, prev) = shortestPath(grid, start, end)
+    bestPositions(cost, prev, shortestPathLength, end).size + 1
+
+  private type State = (Pos, Dir)
+
   private def shortestPath(grid: Grid, start: Pos, end: Pos) =
-    var cost = Map[(Pos, Dir), Int]((start, Right) -> 0)
-    val toVisit = new mutable.PriorityQueue[(Pos, Dir)]()(Ordering.by((p, _) => -manhattan(p, end)))
+    var cost = Map[State, Int]((start, Right) -> 0)
+    val toVisit = new mutable.PriorityQueue[State]()(Ordering.by((p, _) => -manhattan(p, end)))
     toVisit += ((start, Right))
     var best = Int.MaxValue
-    var prev = Map[(Pos, Dir), Set[(Pos, Dir)]]()
+    var prev = Map[State, Set[State]]()
     while toVisit.nonEmpty do
       val (pos, dir) = toVisit.dequeue()
 
@@ -44,30 +53,27 @@ object Day16:
       }
     (best, cost, prev)
 
-  def part2(input: Seq[String]): Int =
-    val grid = makeGrid(input)
-    val start = find(grid, 'S').get
-    val end = find(grid, 'E').get
-    val (best, cost, prev) = shortestPath(grid, start, end)
-    var positions = Set[Pos]()
-    var queue: Set[(Pos, Dir)] =
-      Set(Left, Right, Up, Down).filter { d => prev.contains((end, d)) && cost((end, d)) == best }.map(d => (end, d))
-    while queue.nonEmpty do
-      val (pos, dir) = queue.head
-      val state = (pos, dir)
-      queue = queue - state
-      val before = prev.getOrElse(state, Set.empty)
-      queue = queue ++ before
-      positions = positions ++ before.map(_._1)
-
-//    positions.foreach(p =>
-//      set(grid, p, 'O')
-//    )
-    // printGrid(grid)
-    positions.size + 1
-
-  def getPath(prev: Map[Pos, Set[Pos]], pos: Pos): Set[Pos] =
+  private def getPath(prev: Map[Pos, Set[Pos]], pos: Pos): Set[Pos] =
     prev.get(pos) match
       case None => Set.empty
       case Some(previous) =>
         previous.flatMap { p => getPath(prev, p) } + pos
+
+  private def bestPositions(
+      cost: Map[State, Int],
+      prev: Map[State, Set[State]],
+      shortestPathLength: Int,
+      end: Pos
+  ) =
+    var positions = Set[Pos]()
+    var queue: Set[State] =
+      Set(Left, Right, Up, Down).filter { d =>
+        prev.contains((end, d)) && cost((end, d)) == shortestPathLength
+      }.map(d => (end, d))
+    while queue.nonEmpty do
+      val state = queue.head
+      queue = queue - state
+      val before = prev.getOrElse(state, Set.empty)
+      queue = queue ++ before
+      positions = positions ++ before.map(_._1)
+    positions
