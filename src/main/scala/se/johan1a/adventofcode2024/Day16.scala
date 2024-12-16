@@ -21,9 +21,9 @@ object Day16:
 
   private type State = (Pos, Dir)
 
-  private def shortestPath(grid: Grid, start: Pos, end: Pos) =
+  private def shortestPath(grid: Grid, start: Pos, end: Pos, storePrev: Boolean = true) =
     var cost = Map[State, Int]((start, Right) -> 0)
-    val toVisit = new mutable.PriorityQueue[State]()(Ordering.by((p, _) => -manhattan(p, end)))
+    val toVisit = new mutable.PriorityQueue[State]()(Ordering.by((p, d) => -heuristic(p, d, end)))
     toVisit += ((start, Right))
     var best = Int.MaxValue
     var prev = Map[State, Set[State]]()
@@ -43,6 +43,7 @@ object Day16:
           val neighborState = (neighbor, newDir)
           val prevCost = cost.getOrElse(neighborState, Int.MaxValue)
           if c <= prevCost && c <= best then
+
             if c == prevCost then
               prev = prev + (neighborState -> (prev.getOrElse(neighborState, Set.empty) + ((pos, dir))))
             else if c < prevCost then
@@ -52,6 +53,10 @@ object Day16:
             toVisit += neighborState
       }
     (best, cost, prev)
+
+  private def heuristic(pos: Pos, dir: Dir, end: Pos) =
+    val k = if dir == Left || dir == Down then 1000 else 0
+    manhattan(pos, end) + k
 
   private def getPath(prev: Map[Pos, Set[Pos]], pos: Pos): Set[Pos] =
     prev.get(pos) match
