@@ -41,7 +41,7 @@ object Day07:
         || calculate2(n, sum * next, tail)
         || calculate2(n, combine(sum, next), tail)
 
-  def combine(a: Long, b: Long) =
+  def combine(a: Long, b: Long): Long =
     (a.toString + b.toString).toLong
 
   private def parse(line: String) =

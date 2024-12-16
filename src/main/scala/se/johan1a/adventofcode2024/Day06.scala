@@ -2,19 +2,21 @@ package se.johan1a.adventofcode2024
 
 import se.johan1a.adventofcode2024.Utils.*
 
+import scala.annotation.tailrec
+
 object Day06:
 
   def part1(input: Seq[String]): Int =
     val grid = makeGrid(input)
-    var pos = findStartPos(grid)
+    val pos = findStartPos(grid)
     val (seen, _, _) = walk(grid, pos)
     seen.map(_._1).size
 
   def part2(input: Seq[String]): Int =
     val grid = makeGrid(input)
-    var pos = findStartPos(grid)
+    val pos = findStartPos(grid)
     val seen = walk(grid, pos)._1.map(_._1)
-    seen.filter(producesLoop(grid, pos, _)).size
+    seen.count(producesLoop(grid, pos, _))
 
   def producesLoop(grid: Grid, startPos: Pos, obstacle: Pos): Boolean =
     val original = get(grid, obstacle)
@@ -28,6 +30,7 @@ object Day06:
   def walk(grid: Grid, pos: Pos): (Set[(Pos, Dir)], Pos, Dir) =
     walk(grid, Set(), pos, Dir(0, -1))
 
+  @tailrec
   def walk(grid: Grid, seen: Set[(Pos, Dir)], pos: Pos, dir: Dir): (Set[(Pos, Dir)], Pos, Dir) =
     if !inRange(grid, pos) || seen.contains((pos, dir)) then
       (seen, pos, dir)

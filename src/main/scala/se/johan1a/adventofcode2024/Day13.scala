@@ -6,9 +6,9 @@ import java.math.{MathContext, RoundingMode}
 
 object Day13:
 
-  case class Machine(a: Vec2, b: Vec2, prize: Pos)
+  private case class Machine(a: Vec2, b: Vec2, prize: Pos)
 
-  var cache: Map[(Vec2, Int), Option[Int]] = Map()
+  private var cache: Map[(Vec2, Int), Option[Int]] = Map()
 
   def part1(input: Seq[String]): Int =
     parse(input).map(machine =>
@@ -47,7 +47,7 @@ object Day13:
       d.toBigInt + 1
     result
 
-  val precision = BigDecimal("0.00000000000000000000000000001", mc)
+  private val precision = BigDecimal("0.00000000000000000000000000001", mc)
 
   private def isInteger(nbrA: BigDecimal) =
     val remainder = nbrA.remainder(1).abs

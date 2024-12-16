@@ -9,9 +9,7 @@ object Day11:
 
   def part1(input: Seq[String], n: Int = 25): Long =
     val stones = parse(input)
-
-    val result = iterate(stones, n)
-    result.size
+    iterate(stones, n).size
 
   private var lookup = Map[Long, Seq[Long]]()
 

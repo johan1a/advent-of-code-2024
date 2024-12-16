@@ -3,18 +3,16 @@ package se.johan1a.adventofcode2024
 import se.johan1a.adventofcode2024
 import se.johan1a.adventofcode2024.Utils.*
 
-import scala.collection.mutable.ArrayBuffer
 
 object Day10:
 
-  var found = Set[Pos]()
+  private var found = Set[Pos]()
 
   def part1(input: Seq[String]): Int =
     val (grid, starts) = parse(input)
     starts.map(pos =>
       found = Set.empty
-      val n = search(grid, pos)
-      n
+      search(grid, pos)
     ).sum
 
   private def search(grid: Grid, pos: Pos): Int =

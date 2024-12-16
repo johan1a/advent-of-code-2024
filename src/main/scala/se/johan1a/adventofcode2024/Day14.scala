@@ -4,7 +4,7 @@ import se.johan1a.adventofcode2024.Utils.{Vec2, numbers}
 
 object Day14:
 
-  case class Robot(p: Vec2, v: Vec2)
+  private case class Robot(p: Vec2, v: Vec2)
 
   def part1(input: Seq[String], t: Int = 100, w: Int = 101, h: Int = 103): Int =
     var robots = parse(input)
