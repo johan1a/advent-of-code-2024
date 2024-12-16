@@ -66,7 +66,7 @@ object Day15:
         set(grid, pos, '.')
         movedToPos = nextPos
       case '#' =>
-      case ch if ch == '[' || ch == ']'  =>
+      case ch if ch == '[' || ch == ']' =>
         if canMoveTo(grid, nextPos, dir) then
           push(grid, nextPos, dir)
           set(grid, nextPos, '@')
