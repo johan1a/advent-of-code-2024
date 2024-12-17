@@ -42,7 +42,7 @@ object Day17:
           if registers(RegisterA) != 0 then
             sp = literalOperand.toInt
           else
-            sp += 2 // TODO verify
+            sp += 2
         case 4 =>
           registers(RegisterB) = registers(RegisterB) ^ registers(RegisterC)
           sp += 2

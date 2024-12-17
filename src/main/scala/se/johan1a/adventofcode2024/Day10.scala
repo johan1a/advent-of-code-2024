@@ -3,7 +3,6 @@ package se.johan1a.adventofcode2024
 import se.johan1a.adventofcode2024
 import se.johan1a.adventofcode2024.Utils.*
 
-
 object Day10:
 
   private var found = Set[Pos]()
