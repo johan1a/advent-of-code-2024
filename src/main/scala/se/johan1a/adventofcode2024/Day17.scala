@@ -1,16 +1,29 @@
 package se.johan1a.adventofcode2024
 
-import se.johan1a.adventofcode2024.Day17.RegisterB
 import se.johan1a.adventofcode2024.Utils.*
 
 object Day17:
 
+  type State = (Int, Long, Long, Long)
+
   def part1(input: Seq[String]): String =
     val (registers, instructions) = parse(input)
-    run(registers, instructions)
+    run(registers, instructions).mkString(",")
 
   def part2(input: Seq[String]): Int =
-    -1
+    val (registers, instructions) = parse(input)
+    var i = 0 //14110000
+    val max = Int.MaxValue
+    var output = Seq[Long]()
+    while i < max && output != instructions do
+      registers(0) = i
+      registers(1) = 0
+      registers(2) = 0
+      output = run(registers, instructions)
+      if i % 1000000 == 0 then
+        println(s"i: $i, output: ${output}")
+      i += 1
+    i - 1
 
   private val RegisterA = 0
   private val RegisterB = 1
@@ -19,13 +32,19 @@ object Day17:
   private def run(registers: Array[Long], instructions: Seq[Long]) =
     var sp = 0
     var output = Seq[Long]()
-    while sp < instructions.size do
+    var seen: Set[State] = Set()
+    while sp < instructions.size && !seen.contains((sp, registers.head, registers(1), registers(2))) && matches(
+        output,
+        instructions
+      )
+    do
+      seen = seen + ((sp, registers.head, registers(1), registers(2)))
       val opcode = instructions(sp)
       val literalOperand = instructions(sp + 1)
       val comboOperand = getOperand(registers, literalOperand)
-      println(
-        s"sp $sp, registers: ${registers.toSeq}, opcode: $opcode, literalOperand: $literalOperand, comboOperand: $comboOperand"
-      )
+//      println(
+//        s"sp $sp, registers: ${registers.toSeq}, opcode: $opcode, literalOperand: $literalOperand, comboOperand: $comboOperand"
+//      )
       opcode match
         case 0 =>
           val a = registers(RegisterA)
@@ -60,7 +79,10 @@ object Day17:
           registers(RegisterC) = a / b
           sp += 2
 
-    output.mkString(",")
+    output
+
+  private def matches(output: Seq[Long], target: Seq[Long]) =
+    output.zip(target).forall { case (a, b) => a == b }
 
   private def getOperand(registers: Array[Long], op: Long) =
     op match
