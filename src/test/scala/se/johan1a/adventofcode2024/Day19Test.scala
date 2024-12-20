@@ -16,7 +16,6 @@ class Day19Test extends munit.FunSuite:
     assertEquals(Day19.part2(getInput("day19/test.txt")), 16L)
   }
 
-  // too low 1342729399
   test("Part 2") {
     assertEquals(Day19.part2(getInput("day19/input.txt")), 841533074412361L)
   }
