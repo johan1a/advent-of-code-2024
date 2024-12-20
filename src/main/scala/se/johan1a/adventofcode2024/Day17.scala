@@ -13,90 +13,25 @@ object Day17:
 
   def part2(input: Seq[String]): Long =
     val (registers, instructions) = parse(input)
-    var i = Math.pow(8, instructions.size - 1).toLong // 1034000000
-    val max = Long.MaxValue
-    var output = Seq[Long]()
-    while i < max && output != instructions do
-      registers(0) = i
-      registers(1) = 0
-      registers(2) = 0
-      output = run(registers, instructions)
-      if i == 35184372088831L then
-        var x = 3
-      if i % 100000 == 0 then
-        println(s"i: $i, output: ${output}")
-      i += 1
-    i - 1
-
-  var mostNbrMatching = 0L
-  var mostNbrMatchingI = 0L
-  var diff = 1L
-
-  var firstIOf = Map[Int, Long]()
-
-  var check = Map[Long, Long](
-    3L -> 370L,
-    4L -> 8562,
-    5L -> 33138,
-    6L -> 426354,
-    7L -> 4096370,
-    8L -> 12484978,
-    9L -> 79593842,
-    10L -> 2227077490L,
-    11L -> 6522044786L,
-    12L -> 143960998258L,
-    13L -> 831155765618L,
-    14L -> 16224318554482L, // ?
-    15L -> 7428225532274L,
-    16L -> 218534458065266L
-  )
-
-  def part2b(input: Seq[String]): Long =
-    firstIOf = Map[Int, Long]()
-    val (registers, instructions) = parse(input)
-    var startI = Math.pow(8, instructions.size - 1).toLong // 1034000000
-    startI = 0
-    var i = 0L
-    println(s"start i: $i")
+    var a = 0L
     var found = false
-
-    var diffI = 3
-
+    var mostNbrMatching = 0L
+    var mostNbrMatchingA = 0L
     while !found do
-      val (allMatch, nbrMatching, output) = run2(i, instructions)
+      val (allMatch, nbrMatching, output) = run2(a, instructions)
 
-//      print(nbrMatching)
-//      if (startI + i) % 16 == 0 then
-//        println()
-
-//      if i % 1000000 == 0 then
-//        println(s"i: $i, best: $mostNbrMatching")
-
-//      println(s"i: $i, best: $mostNbrMatching")
       found = allMatch
 
-      if nbrMatching > 2 then
-        if (firstIOf.contains(nbrMatching)) && diffI == nbrMatching then
-          if firstIOf(nbrMatching) != i - 1 then
-//            diff = i - firstIOf(nbrMatching)
-            diffI += 1
-
-      if nbrMatching > mostNbrMatching && nbrMatching > 0 then
-        println(s"i: $i, oct: ${i.toOctalString}, output ${output}, nbrMatching: $nbrMatching")
-        firstIOf = firstIOf + (nbrMatching -> i)
-        mostNbrMatchingI = i
+      if nbrMatching > mostNbrMatching && nbrMatching > 1 then
+        println(s"i: $a, oct: ${a.toOctalString}, output ${output}, nbrMatching: $nbrMatching")
+        mostNbrMatchingA = a
         mostNbrMatching = nbrMatching
-//        diff = diff * 8
-      i = i + 1 // nextI(i)
 
-    println()
-    firstIOf.toSeq.sorted.foreach { case (k, v) =>
-      println(s"$k $v")
-    }
-// 57500562
-    mostNbrMatchingI
+      a = nextA(a, Math.max(0, mostNbrMatching - 1))
 
-  private def run3(startA: Long, instructions: Seq[Long]) =
+    mostNbrMatchingA
+
+  private def run2(startA: Long, instructions: Seq[Long]) =
     val registers = Array(startA, 0, 0)
     val output = run(registers, instructions)
     var i = 0
@@ -104,61 +39,20 @@ object Day17:
       i += 1
     (i == instructions.size && output.size == instructions.size, i, output.mkString(","))
 
-  // 2 1
-//2 14
+  private def nextA(a: Long, nbrLockedDigits: Long) =
+    val digits = toOctalDigitArray(a)
+    val fixedDigits = digits.drop((digits.length - nbrLockedDigits).toInt)
+    val leftDigits = digits.take(digits.length - fixedDigits.length)
 
-//14x1,4x2
-  private def func(a: Long): Long =
-    var b = (a % 8) ^ 3
-    b = (b ^ (a / 2 ^ b)) ^ 3
-    b % 8
+    val increasedLeftPart = fromOctalDigitArray(leftDigits) + 1
+    val increasedLeftPartDigits = toOctalDigitArray(increasedLeftPart)
+    fromOctalDigitArray(increasedLeftPartDigits ++ fixedDigits)
 
-  private def func2(a: Long): Long =
-    var b = a % 8
-    b = (b ^ (a / 2 ^ b)) ^ 3
-    b % 8
+  private def toOctalDigitArray(n: Long) =
+    n.toOctalString.toCharArray.map(_.toString.toLong)
 
-  private def func3(a: Long): Long =
-    if a % 2 == 0 then
-      (a + 3) % 8
-    else
-      (a + 4) % 8
-
-  def func4(a: Long) =
-    (8 - ((a + 10) / 2) % 8) % 8
-
-  private def run2(startA: Long, instructions: Seq[Long]): (Boolean, Int, String) =
-    var continue = true
-    var i = 0
-    var a = startA
-    var output = Seq[Long]()
-    while i < instructions.size && continue && a != 0 do
-      val b = func2(a)
-      output = output :+ b
-      if b != instructions(i) then
-        continue = false
-      a = a / 8
-      i += 1
-    if !continue then
-      i -= 1
-    (continue && a == 0 && i == instructions.size, i, output.mkString(","))
-//  Register A: 2024
-//  Register B: 0
-//  Register C: 0
-//
-//  Program: 0, 3, 5, 4, 3, 0
-//  Program: div, 3, out, 4, jump, 0
-
-// to print 0:
-  // output = output :+ (comboOperand % 8)
-  // ins must be 5,
-  // comboOperand % 8 must be 0
-  // -> literal op must be 0
-  // or 4 && A == 0,
-  // or 5 && B == 0,
-  // or 6 && C ==0
-
-  // ((X / 8) % 8 ) == 0
+  private def fromOctalDigitArray(digits: Array[Long]) =
+    java.lang.Long.parseLong(digits.mkString(""), 8)
 
   private val RegisterA = 0
   private val RegisterB = 1
@@ -177,9 +71,7 @@ object Day17:
       val opcode = instructions(sp)
       val literalOperand = instructions(sp + 1)
       val comboOperand = getOperand(registers, literalOperand)
-//      println(
-//        s"sp $sp, registers: ${registers.toSeq}, opcode: $opcode, literalOperand: $literalOperand, comboOperand: $comboOperand"
-//      )
+
       opcode match
         case 0 =>
           val a = registers(RegisterA)
@@ -232,47 +124,6 @@ object Day17:
     val registers = splitted.head.map(l => numbers(l).head).toArray
     val instructions = numbers(splitted.last.last)
     (registers, instructions)
-
-  def part2c(input: Seq[String]): Long =
-    val (registers, instructions) = parse(input)
-    var i = 0L
-    var found = false
-
-    while !found do
-      val (allMatch, nbrMatching, output) = run3(i, instructions)
-
-      found = allMatch
-
-      println(s"i: $i, oct: ${i.toOctalString}, output ${output}, nbrMatching: $nbrMatching")
-      if nbrMatching > mostNbrMatching && nbrMatching > 1 then
-        mostNbrMatchingI = i
-        mostNbrMatching = nbrMatching
-//        i = resetI(i, mostNbrMatching - 1)
-//      else
-      i = nextI(i, Math.max(0, mostNbrMatching - 1))
-
-    mostNbrMatchingI
-
-  private def nextI(i: Long, nbrLockedDigits: Long) =
-    val digits = toOctalDigitArray(i)
-    val fixedDigits = digits.drop((digits.length - nbrLockedDigits).toInt)
-    val leftDigits = digits.take(digits.size - fixedDigits.length)
-
-    val increasedLeftPart = fromOctalDigitArray(leftDigits) + 1
-    val increasedLeftPartDigits = toOctalDigitArray(increasedLeftPart)
-    fromOctalDigitArray(increasedLeftPartDigits ++ fixedDigits)
-
-
-  private def resetI(i: Long, nbrLockedDigits: Long) =
-    val digits = toOctalDigitArray(i)
-    val lockedDigits = digits.drop((digits.length - nbrLockedDigits).toInt)
-    fromOctalDigitArray(1 +: lockedDigits)
-
-  private def toOctalDigitArray(l: Long) =
-    l.toOctalString.toCharArray.map(_.toString.toLong)
-
-  private def fromOctalDigitArray(newDecimals: Array[Long]) =
-    java.lang.Long.parseLong(newDecimals.mkString(""), 8)
 
 // while A != 0:
 //   A = A / 8
@@ -368,28 +219,3 @@ object Day17:
 // while(A != 0)
 
 //  0 = (((A % 8) xor 3) xor (A / 2^((A % 8) xor 3))) xor 3
-
-// 000 0
-// 001 1
-// 010 2
-// 011 3
-// 100 4
-// 101 5
-// 110 6
-// 111 7
-//
-//
-//
-//
-// 1122
-//
-// (14)
-// 1111111111111122
-// 1111111111111122
-// 1111111111111122
-// 1111111111111122
-// 1111111111111122
-// 1111111111111122
-// 1111111111111133
-// 1111111111111122
-// 1111111111111122
