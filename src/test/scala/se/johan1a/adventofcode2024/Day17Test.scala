@@ -17,6 +17,8 @@ class Day17Test extends munit.FunSuite:
   }
 
   // Too low 35184372088831
+  // too high 7783986802926190962
+  // too high 218534458065266
   test("Part 2") {
     assertEquals(Day17.part2b(getInput("day17/input.txt")), -1L)
   }

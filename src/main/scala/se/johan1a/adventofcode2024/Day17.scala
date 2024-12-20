@@ -27,18 +27,64 @@ object Day17:
       i += 1
     i - 1
 
+  var mostNbrMatching = 0L
+  var mostNbrMatchingI = 0L
+  var diff = 1L
+
+  var bests = Map[Int, Long]()
+
+  var check = Map[Long, Long](
+    3L -> 370L,
+    4L -> 8562,
+    5L -> 33138,
+    6L -> 426354,
+    7L -> 4096370,
+    8L -> 12484978,
+    9L -> 79593842,
+    10L -> 2227077490L,
+    11L -> 6522044786L,
+    12L -> 143960998258L,
+    13L -> 831155765618L,
+    14L -> 16224318554482L, // ?
+    15L -> 7428225532274L,
+    16L -> 218534458065266L
+  )
+
   def part2b(input: Seq[String]): Long =
+    bests = Map[Int, Long]()
     val (registers, instructions) = parse(input)
-    var i = Math.pow(8, instructions.size - 1).toLong // 1034000000
+    var startI = Math.pow(8, instructions.size - 1).toLong // 1034000000
+    startI = 0
+    var i = 0L
     println(s"start i: $i")
     var found = false
     while !found do
-      found = run2(i, instructions)
-//      if i % 1000000 == 0 then
-//        println(s"i: $i")
-      i += 1
-    i - 1
+      val (allMatch, nbrMatching) = run2(i, instructions)
 
+      print(nbrMatching)
+      if (startI + i) % 16 == 0 then
+        println()
+
+      found = allMatch
+
+      if nbrMatching > 2 then
+        assert(i >= check(nbrMatching))
+
+      if nbrMatching > mostNbrMatching && nbrMatching > 1 then
+        bests = bests + (nbrMatching -> i)
+        mostNbrMatchingI = i
+        mostNbrMatching = nbrMatching
+        diff = diff * 8
+      i += diff
+    bests.toSeq.sorted.foreach { case (k, v) =>
+      println(s"$k $v")
+    }
+
+    mostNbrMatchingI
+//2 1
+//2 14
+
+//14x1,4x2
   private def func(a: Long): Long =
     var b = (a % 8) ^ 3
     b = (b ^ (a / 2 ^ b)) ^ 3
@@ -58,9 +104,7 @@ object Day17:
   def func4(a: Long) =
     (8 - ((a + 10) / 2) % 8) % 8
 
-  var best = -1
-
-  private def run2(startA: Long, instructions: Seq[Long]) =
+  private def run2(startA: Long, instructions: Seq[Long]): (Boolean, Int) =
     var continue = true
     var i = 0
     var a = startA
@@ -70,10 +114,9 @@ object Day17:
         continue = false
       a = a / 8
       i += 1
-    if i > best then
-      best = i
-      println(s"best: $best at A: $startA")
-    continue && i == instructions.size
+    if !continue then
+      i -= 1
+    (continue && a == 0 && i == instructions.size, i)
 //  Register A: 2024
 //  Register B: 0
 //  Register C: 0
@@ -268,3 +311,19 @@ object Day17:
 // 101 5
 // 110 6
 // 111 7
+//
+//
+//
+//
+// 1122
+//
+// (14)
+// 1111111111111122
+// 1111111111111122
+// 1111111111111122
+// 1111111111111122
+// 1111111111111122
+// 1111111111111122
+// 1111111111111133
+// 1111111111111122
+// 1111111111111122
