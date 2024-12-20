@@ -239,7 +239,7 @@ object Day17:
     var found = false
 
     while !found do
-      val (allMatch, nbrMatching, output) = run2(i, instructions)
+      val (allMatch, nbrMatching, output) = run3(i, instructions)
 
       found = allMatch
 
