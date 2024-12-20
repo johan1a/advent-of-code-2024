@@ -1,5 +1,6 @@
 package se.johan1a.adventofcode2024
 
+import se.johan1a.adventofcode2024.Day17.parse as input
 import se.johan1a.adventofcode2024.Utils.*
 
 object Day17:
@@ -31,7 +32,7 @@ object Day17:
   var mostNbrMatchingI = 0L
   var diff = 1L
 
-  var bests = Map[Int, Long]()
+  var firstIOf = Map[Int, Long]()
 
   var check = Map[Long, Long](
     3L -> 370L,
@@ -51,37 +52,59 @@ object Day17:
   )
 
   def part2b(input: Seq[String]): Long =
-    bests = Map[Int, Long]()
+    firstIOf = Map[Int, Long]()
     val (registers, instructions) = parse(input)
     var startI = Math.pow(8, instructions.size - 1).toLong // 1034000000
     startI = 0
     var i = 0L
     println(s"start i: $i")
     var found = false
+
+    var diffI = 3
+
     while !found do
-      val (allMatch, nbrMatching) = run2(i, instructions)
+      val (allMatch, nbrMatching, output) = run2(i, instructions)
 
-      print(nbrMatching)
-      if (startI + i) % 16 == 0 then
-        println()
+//      print(nbrMatching)
+//      if (startI + i) % 16 == 0 then
+//        println()
 
+//      if i % 1000000 == 0 then
+//        println(s"i: $i, best: $mostNbrMatching")
+
+//      println(s"i: $i, best: $mostNbrMatching")
       found = allMatch
 
       if nbrMatching > 2 then
-        assert(i >= check(nbrMatching))
+        if (firstIOf.contains(nbrMatching)) && diffI == nbrMatching then
+          if firstIOf(nbrMatching) != i - 1 then
+//            diff = i - firstIOf(nbrMatching)
+            diffI += 1
 
-      if nbrMatching > mostNbrMatching && nbrMatching > 1 then
-        bests = bests + (nbrMatching -> i)
+      if nbrMatching > mostNbrMatching && nbrMatching > 0 then
+        println(s"i: $i, oct: ${i.toOctalString}, output ${output}, nbrMatching: $nbrMatching")
+        firstIOf = firstIOf + (nbrMatching -> i)
         mostNbrMatchingI = i
         mostNbrMatching = nbrMatching
-        diff = diff * 8
-      i += diff
-    bests.toSeq.sorted.foreach { case (k, v) =>
+//        diff = diff * 8
+      i = i + 1 // nextI(i)
+
+    println()
+    firstIOf.toSeq.sorted.foreach { case (k, v) =>
       println(s"$k $v")
     }
-
+// 57500562
     mostNbrMatchingI
-//2 1
+
+  private def run3(startA: Long, instructions: Seq[Long]) =
+    val registers = Array(startA, 0, 0)
+    val output = run(registers, instructions)
+    var i = 0
+    while i < output.size && i < instructions.size && output(i) == instructions(i) do
+      i += 1
+    (i == instructions.size && output.size == instructions.size, i, output.mkString(","))
+
+  // 2 1
 //2 14
 
 //14x1,4x2
@@ -104,19 +127,21 @@ object Day17:
   def func4(a: Long) =
     (8 - ((a + 10) / 2) % 8) % 8
 
-  private def run2(startA: Long, instructions: Seq[Long]): (Boolean, Int) =
+  private def run2(startA: Long, instructions: Seq[Long]): (Boolean, Int, String) =
     var continue = true
     var i = 0
     var a = startA
+    var output = Seq[Long]()
     while i < instructions.size && continue && a != 0 do
-      val b = func4(a)
+      val b = func2(a)
+      output = output :+ b
       if b != instructions(i) then
         continue = false
       a = a / 8
       i += 1
     if !continue then
       i -= 1
-    (continue && a == 0 && i == instructions.size, i)
+    (continue && a == 0 && i == instructions.size, i, output.mkString(","))
 //  Register A: 2024
 //  Register B: 0
 //  Register C: 0
@@ -139,7 +164,7 @@ object Day17:
   private val RegisterB = 1
   private val RegisterC = 2
 
-  private def run(registers: Array[Long], instructions: Seq[Long]) =
+  private def run(registers: Array[Long], instructions: Seq[Long]): Seq[Long] =
     var sp = 0
     var output = Seq[Long]()
     var seen: Set[State] = Set()
@@ -207,6 +232,47 @@ object Day17:
     val registers = splitted.head.map(l => numbers(l).head).toArray
     val instructions = numbers(splitted.last.last)
     (registers, instructions)
+
+  def part2c(input: Seq[String]): Long =
+    val (registers, instructions) = parse(input)
+    var i = 0L
+    var found = false
+
+    while !found do
+      val (allMatch, nbrMatching, output) = run2(i, instructions)
+
+      found = allMatch
+
+      println(s"i: $i, oct: ${i.toOctalString}, output ${output}, nbrMatching: $nbrMatching")
+      if nbrMatching > mostNbrMatching && nbrMatching > 1 then
+        mostNbrMatchingI = i
+        mostNbrMatching = nbrMatching
+//        i = resetI(i, mostNbrMatching - 1)
+//      else
+      i = nextI(i, Math.max(0, mostNbrMatching - 1))
+
+    mostNbrMatchingI
+
+  private def nextI(i: Long, nbrLockedDigits: Long) =
+    val digits = toOctalDigitArray(i)
+    val fixedDigits = digits.drop((digits.length - nbrLockedDigits).toInt)
+    val leftDigits = digits.take(digits.size - fixedDigits.length)
+
+    val increasedLeftPart = fromOctalDigitArray(leftDigits) + 1
+    val increasedLeftPartDigits = toOctalDigitArray(increasedLeftPart)
+    fromOctalDigitArray(increasedLeftPartDigits ++ fixedDigits)
+
+
+  private def resetI(i: Long, nbrLockedDigits: Long) =
+    val digits = toOctalDigitArray(i)
+    val lockedDigits = digits.drop((digits.length - nbrLockedDigits).toInt)
+    fromOctalDigitArray(1 +: lockedDigits)
+
+  private def toOctalDigitArray(l: Long) =
+    l.toOctalString.toCharArray.map(_.toString.toLong)
+
+  private def fromOctalDigitArray(newDecimals: Array[Long]) =
+    java.lang.Long.parseLong(newDecimals.mkString(""), 8)
 
 // while A != 0:
 //   A = A / 8
