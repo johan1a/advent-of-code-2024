@@ -160,9 +160,11 @@ object Utils:
     offsets
       .map(offset => add(pos, offset))
       .filter(inRange(_, min, max))
-
+    
   def makeGrid(lines: Seq[String]): Grid =
     new ArrayBuffer().appendAll(lines.map(l => new ArrayBuffer().appendAll(l)))
+    
+  def max(grid: Grid): Pos = Vec2(grid.head.size, grid.size)
 
   def get(grid: Grid, pos: Vec2): Char =
     grid(pos.y.toInt)(pos.x.toInt)
