@@ -6,7 +6,10 @@ import se.johan1a.adventofcode2024.Utils.Vec2
 class Day21Test extends munit.FunSuite:
 
   test("Part 1 test0") {
-    assertEquals(Day21.shortestPaths(Day21.arrows, Vec2(3, 1), Vec2(2, 2)).toSet, Set(Seq('<', 'v'), Seq('v', '<')))
+    assertEquals(
+      Day21.shortestPaths(Day21.arrows, Vec2(3, 1), Vec2(2, 2), true).toSet,
+      Set(Seq('<', 'v'), Seq('v', '<'))
+    )
   }
 
   test("Part 1 test1") {
@@ -15,23 +18,23 @@ class Day21Test extends munit.FunSuite:
       "<A^A^>^AvvvA".toCharArray,
       "<A^A^^>AvvvA".toCharArray
     )
-    assertEquals(Day21.shortestSequences(Seq('0', '2', '9', 'A'), Day21.numpad).toSet, expected)
+    assertEquals(Day21.shortestSequences(Seq('0', '2', '9', 'A'), Day21.numpad, true).toSet, expected)
   }
 
   test("Part 1 test2") {
     val code = "<A^A>^^AvvvA".toCharArray
-    val actual = Day21.shortestSequences(code, Day21.arrows)
-    assertEquals(actual.toSet.size, 28)
+    val actual = Day21.shortestSequences(code, Day21.arrows, true)
+    assertEquals(actual.toSet.size, 32)
   }
 
   test("Part 1 test") {
     assertEquals(Day21.part1(getInput("day21/test.txt")), 126384L)
   }
-//
-//  test("Part 1") {
-//    assertEquals(Day21.part1(getInput("day21/input.txt")), -1)
-//  }
-//
+
+  test("Part 1") {
+    assertEquals(Day21.part1(getInput("day21/input.txt")), 156714L)
+  }
+
 //  test("Part 2") {
 //    assertEquals(Day21.part2(getInput("day21/input.txt")), -1)
 //  }

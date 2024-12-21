@@ -27,26 +27,27 @@ object Day21:
       val code = line.toCharArray
       val sequence = shortestSequence(code)
       val c = complexity(code, sequence)
+      println(s"code: $line, complexity: $c")
       c
     }.sum
 
   private def shortestSequence(code: Seq[Char]): Seq[Char] =
-    val sequences0 = shortestSequences(code, numpad)
+    val sequences0 = shortestSequences(code, numpad, true)
     val result = sequences0.flatMap { sequence =>
-      val sequences1 = shortestSequences(sequence, arrows)
+      val sequences1 = shortestSequences(sequence, arrows, true)
       val sequences2 = sequences1.flatMap(sequence1 =>
-        shortestSequences(sequence1, arrows)
+        shortestSequences(sequence1, arrows, false)
       )
       sequences2
     }
     result.minBy(_.size)
 
-  def shortestSequences(code: Seq[Char], grid: Grid): Seq[Seq[Char]] =
+  def shortestSequences(code: Seq[Char], grid: Grid, multiple: Boolean): Seq[Seq[Char]] =
     var pos = find(grid, 'A').get
     var sequences = Seq[Seq[Char]]()
     code.foreach { targetChar =>
       val target = find(grid, targetChar).get
-      val paths = shortestPaths(grid, pos, target)
+      val paths = shortestPaths(grid, pos, target, multiple)
       val pathsWithA = paths.map(s => s :+ 'A')
       sequences = pathsWithA.flatMap(path =>
         if sequences.isEmpty then
@@ -54,12 +55,11 @@ object Day21:
         else
           sequences.map(sequence => sequence ++ path)
       )
-      var x = 3
       pos = target
     }
     sequences
 
-  def shortestPaths(grid: Grid, start: Pos, end: Pos): Seq[Seq[Char]] =
+  def shortestPaths(grid: Grid, start: Pos, end: Pos, multiple: Boolean): Seq[Seq[Char]] =
     var queue = Seq(start)
     var found = false
     var seen = Set[Pos]()
@@ -84,7 +84,10 @@ object Day21:
               queue = queue :+ neighbor
           }
     val sequences = getSequences(prev, end)
-    sequences.map(getCharSequence)
+    if multiple then
+      sequences.map(getCharSequence)
+    else
+      sequences.map(getCharSequence).take(1)
 
   private def getCharSequence(sequence: Seq[Pos]): Seq[Char] =
     if sequence.size < 2 then
