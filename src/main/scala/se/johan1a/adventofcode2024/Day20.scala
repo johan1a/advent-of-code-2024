@@ -12,11 +12,8 @@ object Day20:
     val end = find(grid, 'E').get
     val (originalLength, originalShortestPath) = shortestPath(grid, start, end)
     val posToIndex = originalShortestPath.zipWithIndex.map { (pos, i) => pos -> i }.toMap
-    println(s"originalShortestPath length: $originalLength")
     cache = Map()
-    val result = shortestPathCheat(grid, start, 0, false, end, originalLength - targetSaved, posToIndex)
-    println(s"result: $result")
-    result
+    shortestPathCheat(grid, start, 0, false, end, originalLength - targetSaved, posToIndex)
 
   private def shortestPathCheat(
       grid: Grid,
@@ -34,7 +31,6 @@ object Day20:
       val result = if dist > target then
         0
       else if pos == end then
-        println(dist)
         if dist <= target then
           1
         else
