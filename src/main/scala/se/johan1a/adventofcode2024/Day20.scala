@@ -141,5 +141,25 @@ object Day20:
       case None         => Seq(pos)
       case Some(before) => getPath(prev, before) :+ pos
 
-  def part2(input: Seq[String]): Int =
-    -1
+  def part2(input: Seq[String], targetSaved: Int = 100): Int =
+    val grid = makeGrid(input)
+    val start = find(grid, 'S').get
+    val end = find(grid, 'E').get
+    val (originalLength, originalPath) = shortestPath(grid, start, end)
+    val posToIndex = originalPath.zipWithIndex.map { (pos, i) => pos -> i }.toMap
+
+    var found = 0
+    originalPath.indices.reverse.foreach { i =>
+      println(s"i: $i, size: ${originalPath.size}")
+      val a = originalPath(i)
+      0.until(i - 1).reverse.foreach { j =>
+        val b = originalPath(j)
+        val pathDist = i - j
+        val manhattanDist = manhattan(a, b)
+        if manhattanDist < pathDist && pathDist - manhattanDist >= targetSaved then {
+          found += 1
+        }
+      }
+    }
+
+    found
