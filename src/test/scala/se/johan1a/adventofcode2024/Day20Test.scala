@@ -29,7 +29,7 @@ class Day20Test extends munit.FunSuite:
   }
 
   test("Part 1") {
-    assertEquals(Day20.part1(getInput("day20/input.txt")), -1)
+    assertEquals(Day20.part1(getInput("day20/input.txt")), 1490)
   }
 //
 //  test("Part 2") {

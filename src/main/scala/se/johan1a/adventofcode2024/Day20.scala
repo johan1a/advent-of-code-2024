@@ -4,7 +4,7 @@ import se.johan1a.adventofcode2024.Utils.*
 
 object Day20:
 
-  var cache = Map[(Pos, Int, Option[Vec2]), Int]()
+  var cache = Map[(Pos, Int, Boolean), Int]()
 
   def part1(input: Seq[String], targetSaved: Int = 100): Int =
     val grid = makeGrid(input)
@@ -14,20 +14,21 @@ object Day20:
     val posToIndex = originalShortestPath.zipWithIndex.map { (pos, i) => pos -> i }.toMap
     println(s"originalShortestPath length: $originalLength")
     cache = Map()
-    val result = shortestPathCheat(grid, start, 0, None, end, originalLength - targetSaved, posToIndex)
+    val result = shortestPathCheat(grid, start, 0, false, end, originalLength - targetSaved, posToIndex)
+    println(s"result: $result")
     result
 
   private def shortestPathCheat(
       grid: Grid,
       pos: Vec2,
       dist: Int,
-      hasCheatedAt: Option[Vec2],
+      hasCheated: Boolean,
       end: Vec2,
       target: Int,
       posToIndex: Map[Pos, Int]
   ): Int =
-    if cache.contains((pos, dist, hasCheatedAt)) then
-      val res = cache((pos, dist, hasCheatedAt))
+    if cache.contains((pos, dist, hasCheated)) then
+      val res = cache((pos, dist, hasCheated))
       res
     else
       val result = if dist > target then
@@ -39,7 +40,7 @@ object Day20:
         else
           0
       else
-        val possibleNeighbors = getNeighbors(grid, pos, hasCheatedAt.isDefined)
+        val possibleNeighbors = getNeighbors(grid, pos, hasCheated)
         val betterNeighbors = possibleNeighbors.filter { neighbor =>
           val i = posToIndex(neighbor._1)
           i > posToIndex(pos)
@@ -48,18 +49,17 @@ object Day20:
         val results = betterNeighbors
           .map { (neighbor, cheatedNow) =>
             val d = manhattan(pos, neighbor).toInt
-            val cheat = cheatedNow || hasCheatedAt.isDefined
-            val cheatPos = if cheatedNow then Some(pos) else hasCheatedAt
-            val res = shortestPathCheat(grid, neighbor, dist + d, cheatPos, end, target, posToIndex)
+            val cheat = cheatedNow || hasCheated
+            val res = shortestPathCheat(grid, neighbor, dist + d, cheatedNow || hasCheated, end, target, posToIndex)
             (neighbor, cheat, res)
           }
 
         results.map(_._3).sum
 
-      if cache.contains((pos, dist, hasCheatedAt)) && result != cache((pos, dist, hasCheatedAt)) then
+      if cache.contains((pos, dist, hasCheated)) && result != cache((pos, dist, hasCheated)) then
         var x = 3
 
-      cache = cache + ((pos, dist, hasCheatedAt) -> result)
+      cache = cache + ((pos, dist, hasCheated) -> result)
       result
 
   private def isFree(grid: Grid, pos: Pos): Boolean =
