@@ -158,9 +158,9 @@ object Day20:
         val pathDist = i - j
         val manhattanDist = manhattan(a, b)
         if manhattanDist < pathDist && pathDist - manhattanDist >= targetSaved then
-          found += 1
+          found = found + 1
         j -= 1
     }
 
-    println(s"found: $found")
+    println(s"found: ${found}")
     found
