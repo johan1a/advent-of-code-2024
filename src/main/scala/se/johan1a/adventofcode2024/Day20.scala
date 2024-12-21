@@ -6,14 +6,7 @@ object Day20:
 
   var cache = Map[(Pos, Int, Boolean), Int]()
 
-  def part1(input: Seq[String], targetSaved: Int = 100): Int =
-    val grid = makeGrid(input)
-    val start = find(grid, 'S').get
-    val end = find(grid, 'E').get
-    val (originalLength, originalShortestPath) = shortestPath(grid, start, end)
-    val posToIndex = originalShortestPath.zipWithIndex.map { (pos, i) => pos -> i }.toMap
-    cache = Map()
-    shortestPathCheat(grid, start, 0, false, end, originalLength - targetSaved, posToIndex)
+  def part1(input: Seq[String], targetSaved: Int = 100): Int = part2(input, targetSaved, d = 2)
 
   private def shortestPathCheat(
       grid: Grid,
