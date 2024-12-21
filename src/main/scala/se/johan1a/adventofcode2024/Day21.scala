@@ -4,7 +4,10 @@ import se.johan1a.adventofcode2024.Utils.*
 
 object Day21:
 
-  val numpad =
+  val numpad = 0
+  val arrows = 1
+
+  val numpadGrid =
     makeGrid(
       """#####
       |#789#
@@ -14,7 +17,7 @@ object Day21:
       |#####""".stripMargin.split("\n")
     )
 
-  val arrows = makeGrid(
+  val arrowsGrid = makeGrid(
     """#####
       |##^A#
       |#<v>#
@@ -22,7 +25,12 @@ object Day21:
       |""".stripMargin.split("\n")
   )
 
+  var cache = Map[(Int, Pos, Pos), Seq[Seq[Char]]]()
+
   def part1(input: Seq[String]): Long =
+
+    cache = Map()
+
     input.map { line =>
       val code = line.toCharArray
       val sequence = shortestSequence(code)
@@ -31,23 +39,21 @@ object Day21:
       c
     }.sum
 
-  private def shortestSequence(code: Seq[Char]): Seq[Char] =
-    val sequences0 = shortestSequences(code, numpad, true)
-    val result = sequences0.flatMap { sequence =>
-      val sequences1 = shortestSequences(sequence, arrows, true)
-      val sequences2 = sequences1.flatMap(sequence1 =>
-        shortestSequences(sequence1, arrows, false)
-      )
-      sequences2
+  private def shortestSequence(code: Seq[Char], n: Int = 2): Seq[Char] =
+    var sequences = shortestSequences(code, numpad, true)
+    0.until(n).foreach { i =>
+      val multiple = i < n - 1
+      sequences = sequences.flatMap { shortestSequences(_, arrows, multiple) }
     }
-    result.minBy(_.size)
+    sequences.minBy(_.size)
 
-  def shortestSequences(code: Seq[Char], grid: Grid, multiple: Boolean): Seq[Seq[Char]] =
+  def shortestSequences(code: Seq[Char], gridType: Int, multiple: Boolean): Seq[Seq[Char]] =
+    val grid = if gridType == numpad then numpadGrid else arrowsGrid
     var pos = find(grid, 'A').get
     var sequences = Seq[Seq[Char]]()
     code.foreach { targetChar =>
       val target = find(grid, targetChar).get
-      val paths = shortestPaths(grid, pos, target, multiple)
+      val paths = shortestPaths(gridType, pos, target, multiple)
       val pathsWithA = paths.map(s => s :+ 'A')
       sequences = pathsWithA.flatMap(path =>
         if sequences.isEmpty then
@@ -59,35 +65,45 @@ object Day21:
     }
     sequences
 
-  def shortestPaths(grid: Grid, start: Pos, end: Pos, multiple: Boolean): Seq[Seq[Char]] =
-    var queue = Seq(start)
-    var found = false
-    var seen = Set[Pos]()
-    var prev = Map[Pos, Seq[Pos]]()
-    var dist = Map[Pos, Int](start -> 0).withDefaultValue(Int.MaxValue / 2)
-
-    while queue.nonEmpty do
-      val pos = queue.head
-      queue = queue.tail
-      if !seen.contains(pos) then
-        seen = seen + pos
-
-        if pos == end then
-          found = true
-
-        neighbors(pos, includeDiagonals = false)
-          .filter(p => inRange(grid, p) && get(grid, p) != '#')
-          .foreach { neighbor =>
-            if dist(pos) + 1 <= dist(neighbor) then
-              dist = dist + (neighbor -> (dist(pos) + 1))
-              prev = prev + (neighbor -> (prev.getOrElse(neighbor, Seq.empty) :+ pos))
-              queue = queue :+ neighbor
-          }
-    val sequences = getSequences(prev, end)
+  def shortestPaths(gridType: Int, start: Pos, end: Pos, multiple: Boolean): Seq[Seq[Char]] =
+    val paths = shortestPaths(gridType, start, end)
     if multiple then
-      sequences.map(getCharSequence)
+      paths
     else
-      sequences.map(getCharSequence).take(1)
+      paths.take(1)
+
+  def shortestPaths(gridType: Int, start: Pos, end: Pos): Seq[Seq[Char]] =
+    if cache.contains((gridType, start, end)) then
+      cache((gridType, start, end))
+    else
+      val grid = if gridType == numpad then numpadGrid else arrowsGrid
+      var queue = Seq(start)
+      var found = false
+      var seen = Set[Pos]()
+      var prev = Map[Pos, Seq[Pos]]()
+      var dist = Map[Pos, Int](start -> 0).withDefaultValue(Int.MaxValue / 2)
+
+      while queue.nonEmpty do
+        val pos = queue.head
+        queue = queue.tail
+        if !seen.contains(pos) then
+          seen = seen + pos
+
+          if pos == end then
+            found = true
+
+          neighbors(pos, includeDiagonals = false)
+            .filter(p => inRange(grid, p) && get(grid, p) != '#')
+            .foreach { neighbor =>
+              if dist(pos) + 1 <= dist(neighbor) then
+                dist = dist + (neighbor -> (dist(pos) + 1))
+                prev = prev + (neighbor -> (prev.getOrElse(neighbor, Seq.empty) :+ pos))
+                queue = queue :+ neighbor
+            }
+      val sequences = getSequences(prev, end)
+      val result = sequences.map(getCharSequence)
+      cache = cache + (((gridType, start, end)) -> result)
+      result
 
   private def getCharSequence(sequence: Seq[Pos]): Seq[Char] =
     if sequence.size < 2 then
@@ -118,5 +134,11 @@ object Day21:
   private def complexity(code: Seq[Char], sequence: Seq[Char]): Long =
     sequence.size * numbers(code.mkString("")).head
 
-  def part2(input: Seq[String]): Int =
-    -1
+  def part2(input: Seq[String]): Long =
+    input.map { line =>
+      val code = line.toCharArray
+      val sequence = shortestSequence(code, n = 3)
+      val c = complexity(code, sequence)
+      println(s"code: $line, complexity: $c")
+      c
+    }.sum
