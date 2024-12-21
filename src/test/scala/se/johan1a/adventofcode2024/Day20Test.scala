@@ -45,7 +45,6 @@ class Day20Test extends munit.FunSuite:
     assertEquals(Day20.part2(getInput("day20/test.txt"), 50), 285)
   }
 
-  // 43381051 too high
   test("Part 2") {
-    assertEquals(Day20.part2(getInput("day20/input.txt")), -1)
+    assertEquals(Day20.part2(getInput("day20/input.txt")), 1011325)
   }
