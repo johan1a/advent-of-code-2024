@@ -14,7 +14,7 @@ object Day20:
     val posToIndex = originalShortestPath.zipWithIndex.map { (pos, i) => pos -> i }.toMap
     println(s"originalShortestPath length: $originalLength")
     cache = Map()
-    val result = shortestPathCheat(grid, start, 0, None, end, originalLength - targetSaved, Seq(start), posToIndex)
+    val result = shortestPathCheat(grid, start, 0, None, end, originalLength - targetSaved, posToIndex)
     result
 
   private def shortestPathCheat(
@@ -24,7 +24,6 @@ object Day20:
       hasCheatedAt: Option[Vec2],
       end: Vec2,
       target: Int,
-      path: Seq[Vec2],
       posToIndex: Map[Pos, Int]
   ): Int =
     if cache.contains((pos, dist, hasCheatedAt)) then
@@ -46,28 +45,20 @@ object Day20:
           i > posToIndex(pos)
         }
 
-        if path == Seq(Vec2(1, 1), Vec2(1, 2)) then
-          var x = 3
-
         val results = betterNeighbors
           .map { (neighbor, cheatedNow) =>
             val d = manhattan(pos, neighbor).toInt
             val cheat = cheatedNow || hasCheatedAt.isDefined
             val cheatPos = if cheatedNow then Some(pos) else hasCheatedAt
-            val res = if path.contains(neighbor) then
-              0
-            else
-              shortestPathCheat(grid, neighbor, dist + d, cheatPos, end, target, path :+ neighbor, posToIndex)
+            val res = shortestPathCheat(grid, neighbor, dist + d, cheatPos, end, target, posToIndex)
             (neighbor, cheat, res)
           }
 
         results.map(_._3).sum
 
-      if pos == Vec2(3, 2) && dist == 3 && hasCheatedAt.isDefined then
-        var x = 3
-
       if cache.contains((pos, dist, hasCheatedAt)) && result != cache((pos, dist, hasCheatedAt)) then
         var x = 3
+
       cache = cache + ((pos, dist, hasCheatedAt) -> result)
       result
 
