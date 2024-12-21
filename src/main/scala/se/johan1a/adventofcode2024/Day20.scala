@@ -152,14 +152,15 @@ object Day20:
     originalPath.indices.reverse.foreach { i =>
       println(s"i: $i, size: ${originalPath.size}")
       val a = originalPath(i)
-      0.until(i - 1).reverse.foreach { j =>
+      var j = i - targetSaved
+      while j >= 0 do
         val b = originalPath(j)
         val pathDist = i - j
         val manhattanDist = manhattan(a, b)
-        if manhattanDist < pathDist && pathDist - manhattanDist >= targetSaved then {
+        if manhattanDist < pathDist && pathDist - manhattanDist >= targetSaved then
           found += 1
-        }
-      }
+        j -= 1
     }
 
+    println(s"found: $found")
     found
