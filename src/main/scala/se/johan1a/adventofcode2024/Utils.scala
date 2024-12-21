@@ -25,10 +25,10 @@ object Utils:
         case 'v' => Down
 
   case class Vec2(x: Long, y: Long):
-    def leftOf(other: Vec2): Boolean = x < other.x
-    def rightOf(other: Vec2): Boolean = x > other.x
-    def above(other: Vec2): Boolean = y < other.y
-    def below(other: Vec2): Boolean = y > other.y
+    infix def leftOf(other: Vec2): Boolean = x < other.x
+    infix def rightOf(other: Vec2): Boolean = x > other.x
+    infix def above(other: Vec2): Boolean = y < other.y
+    infix def below(other: Vec2): Boolean = y > other.y
 
     def +(other: Vec2): Vec2 = add(this, other)
     def +(other: Dir): Vec2 = add(this, Vec2(other.x, other.y))
@@ -160,10 +160,10 @@ object Utils:
     offsets
       .map(offset => add(pos, offset))
       .filter(inRange(_, min, max))
-    
+
   def makeGrid(lines: Seq[String]): Grid =
     new ArrayBuffer().appendAll(lines.map(l => new ArrayBuffer().appendAll(l)))
-    
+
   def max(grid: Grid): Pos = Vec2(grid.head.size, grid.size)
 
   def get(grid: Grid, pos: Vec2): Char =
