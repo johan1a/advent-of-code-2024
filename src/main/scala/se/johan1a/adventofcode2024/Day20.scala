@@ -141,7 +141,7 @@ object Day20:
       case None         => Seq(pos)
       case Some(before) => getPath(prev, before) :+ pos
 
-  def part2(input: Seq[String], targetSaved: Int = 100): Int =
+  def part2(input: Seq[String], targetSaved: Int = 100, d: Int = 20): Int =
     val grid = makeGrid(input)
     val start = find(grid, 'S').get
     val end = find(grid, 'E').get
@@ -150,16 +150,21 @@ object Day20:
 
     var found = 0
     originalPath.indices.reverse.foreach { i =>
-      println(s"i: $i, size: ${originalPath.size}")
       val a = originalPath(i)
-      var j = i - targetSaved
-      while j >= 0 do
-        val b = originalPath(j)
-        val pathDist = i - j
-        val manhattanDist = manhattan(a, b)
-        if manhattanDist <= 20 && manhattanDist < pathDist && pathDist - manhattanDist >= targetSaved then
-          found = found + 1
-        j -= 1
+
+      var y = a.y - d
+      while y <= a.y + d do
+        var x = a.x - d
+        while x <= a.x + d do
+          val b = Vec2(x, y)
+          if posToIndex.contains(b) then
+            val j = posToIndex(b)
+            val pathDist = i - j
+            val manhattanDist = manhattan(a, b)
+            if manhattanDist <= d && manhattanDist < pathDist && pathDist - manhattanDist >= targetSaved then
+              found = found + 1
+          x += 1
+        y += 1
     }
 
     println(s"found: ${found}")
