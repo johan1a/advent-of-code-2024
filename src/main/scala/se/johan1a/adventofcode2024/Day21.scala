@@ -46,13 +46,15 @@ object Day21:
     var sequences = Seq[Seq[Char]]()
     code.foreach { targetChar =>
       val target = find(grid, targetChar).get
-      val ss: Seq[Seq[Char]] = shortestPaths(grid, pos, target).map(s => s :+ 'A')
-      sequences = ss.flatMap(s =>
+      val paths = shortestPaths(grid, pos, target)
+      val pathsWithA = paths.map(s => s :+ 'A')
+      sequences = pathsWithA.flatMap(path =>
         if sequences.isEmpty then
-          ss
+          Seq(path)
         else
-          sequences.map(s0 => s0 ++ s)
+          sequences.map(sequence => sequence ++ path)
       )
+      var x = 3
       pos = target
     }
     sequences
@@ -74,7 +76,7 @@ object Day21:
           found = true
 
         neighbors(pos, includeDiagonals = false)
-          .filter(inRange(grid, _))
+          .filter(p => inRange(grid, p) && get(grid, p) != '#')
           .foreach { neighbor =>
             if dist(pos) + 1 <= dist(neighbor) then
               dist = dist + (neighbor -> (dist(pos) + 1))
@@ -85,11 +87,14 @@ object Day21:
     sequences.map(getCharSequence)
 
   private def getCharSequence(sequence: Seq[Pos]): Seq[Char] =
-    sequence.sliding(2).toSeq.map(ab =>
-      val a = ab.head
-      val b = ab.last
-      charDir(a, b)
-    )
+    if sequence.size < 2 then
+      Seq.empty
+    else
+      sequence.sliding(2).toSeq.map(ab =>
+        val a = ab.head
+        val b = ab.last
+        charDir(a, b)
+      )
 
   private def getSequences(prev: Map[Pos, Seq[Pos]], pos: Pos): Seq[Seq[Pos]] =
     prev.getOrElse(pos, Seq.empty) match

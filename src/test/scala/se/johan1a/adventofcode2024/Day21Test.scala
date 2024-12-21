@@ -18,6 +18,12 @@ class Day21Test extends munit.FunSuite:
     assertEquals(Day21.shortestSequences(Seq('0', '2', '9', 'A'), Day21.numpad).toSet, expected)
   }
 
+  test("Part 1 test2") {
+    val code = "<A^A>^^AvvvA".toCharArray
+    val actual = Day21.shortestSequences(code, Day21.arrows)
+    assertEquals(actual.toSet.size, 28)
+  }
+
   test("Part 1 test") {
     assertEquals(Day21.part1(getInput("day21/test.txt")), 126384L)
   }
