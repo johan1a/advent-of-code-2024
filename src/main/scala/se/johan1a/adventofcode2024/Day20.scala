@@ -1,82 +1,75 @@
 package se.johan1a.adventofcode2024
 
-import se.johan1a
-import se.johan1a.adventofcode2024
 import se.johan1a.adventofcode2024.Utils.*
 
 object Day20:
 
-  var cache = Map[(Pos, Int, Boolean), Int]()
-  var seen = Set[Pos]()
+  var cache = Map[(Pos, Int, Option[Vec2]), Int]()
 
   def part1(input: Seq[String], targetSaved: Int = 100): Int =
     val grid = makeGrid(input)
     val start = find(grid, 'S').get
     val end = find(grid, 'E').get
-    val originalShortestPath = shortestPath(grid, start, end)
-//    assert(originalShortestPath == 84)
+    val (originalLength, originalShortestPath) = shortestPath(grid, start, end)
+    val posToIndex = originalShortestPath.zipWithIndex.map { (pos, i) => pos -> i }.toMap
+    println(s"originalShortestPath length: $originalLength")
     cache = Map()
-    seen = Set(start)
-    val result = shortestPathCheat(grid, start, 0, false, end, originalShortestPath - targetSaved, Seq(start))
+    val result = shortestPathCheat(grid, start, 0, None, end, originalLength - targetSaved, Seq(start), posToIndex)
     result
 
   private def shortestPathCheat(
       grid: Grid,
       pos: Vec2,
       dist: Int,
-      hasCheated: Boolean,
+      hasCheatedAt: Option[Vec2],
       end: Vec2,
       target: Int,
-      path: Seq[Vec2]
+      path: Seq[Vec2],
+      posToIndex: Map[Pos, Int]
   ): Int =
-    seen = seen + pos
-    if dist > target then
-      0
-    else if false && cache.contains((pos, dist, hasCheated)) then
-      cache((pos, dist, hasCheated))
+    if cache.contains((pos, dist, hasCheatedAt)) then
+      val res = cache((pos, dist, hasCheatedAt))
+      res
     else
-      if pos == end then
-        printPath(grid, path)
+      val result = if dist > target then
+        0
+      else if pos == end then
         println(dist)
         if dist <= target then
           1
         else
           0
       else
-        val possibleNeighbors = getNeighbors(grid, pos, hasCheated)
-        val nonVisitedNeighbors = possibleNeighbors
-//          .filterNot(p => seen.contains(p._1))
+        val possibleNeighbors = getNeighbors(grid, pos, hasCheatedAt.isDefined)
+        val betterNeighbors = possibleNeighbors.filter { neighbor =>
+          val i = posToIndex(neighbor._1)
+          i > posToIndex(pos)
+        }
 
         if path == Seq(Vec2(1, 1), Vec2(1, 2)) then
           var x = 3
-        val results = nonVisitedNeighbors
+
+        val results = betterNeighbors
           .map { (neighbor, cheatedNow) =>
-
-            if path == Seq(Vec2(1, 1), Vec2(1, 2)) then
-              var x = 3
             val d = manhattan(pos, neighbor).toInt
-
-            val cheat = cheatedNow || hasCheated
-            if cheatedNow then
-              println(s"cheating at $pos -> $neighbor")
-            //       seen = seen + pos
+            val cheat = cheatedNow || hasCheatedAt.isDefined
+            val cheatPos = if cheatedNow then Some(pos) else hasCheatedAt
             val res = if path.contains(neighbor) then
               0
             else
-              shortestPathCheat(grid, neighbor, dist + d, cheat, end, target, path :+ neighbor)
-            //      seen = seen - neighbor
-            if path == Seq(Vec2(1, 1), Vec2(1, 2), Vec2(3, 2)) then
-              var x = 3
+              shortestPathCheat(grid, neighbor, dist + d, cheatPos, end, target, path :+ neighbor, posToIndex)
             (neighbor, cheat, res)
           }
 
-        val result = results.map(_._3).sum
-        cache = cache + ((pos, dist, hasCheated) -> result)
+        results.map(_._3).sum
 
-        if pos == Vec2(3, 1) || pos == Vec2(3, 2) then
-          var x = 3
+      if pos == Vec2(3, 2) && dist == 3 && hasCheatedAt.isDefined then
+        var x = 3
 
-        result
+      if cache.contains((pos, dist, hasCheatedAt)) && result != cache((pos, dist, hasCheatedAt)) then
+        var x = 3
+      cache = cache + ((pos, dist, hasCheatedAt) -> result)
+      result
 
   private def isFree(grid: Grid, pos: Pos): Boolean =
     getOpt(grid, pos).contains('.') || getOpt(grid, pos).contains('E')
@@ -130,16 +123,18 @@ object Day20:
       )
     result
 
-  private def shortestPath(grid: Grid, start: Vec2, end: Vec2): Int =
+  private def shortestPath(grid: Grid, start: Vec2, end: Vec2): (Int, Seq[Pos]) =
     var queue = Seq(start)
     var seen = Set[Pos]()
     var dist = Map[Pos, Int](start -> 0).withDefaultValue(Int.MaxValue)
-    while queue.nonEmpty do
+    var prev = Map[Pos, Pos]()
+    var found = false
+    while queue.nonEmpty && !found do
       val pos = queue.head
       queue = queue.tail
 
       if pos == end then
-        return dist(pos)
+        found = true
 
       if !seen.contains(pos) then
         seen = seen + pos
@@ -149,9 +144,15 @@ object Day20:
           val d = dist(pos) + 1
           if d < dist(neighbor) then
             dist = dist + (neighbor -> d)
+            prev = prev + (neighbor -> pos)
             queue = queue :+ neighbor
         }
-    -1
+    (dist(end), getPath(prev, end))
+
+  private def getPath(prev: Map[Pos, Pos], pos: Vec2): Seq[Pos] =
+    prev.get(pos) match
+      case None         => Seq(pos)
+      case Some(before) => getPath(prev, before) :+ pos
 
   def part2(input: Seq[String]): Int =
     -1

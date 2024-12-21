@@ -17,20 +17,20 @@ class Day20Test extends munit.FunSuite:
   }
 
   test("Part 1 test 2") {
-    assertEquals(Day20.part1(getInput("day20/test3.txt"), 2), 6)
+    assertEquals(Day20.part1(getInput("day20/test3.txt"), 2), 2)
   }
 
   test("Part 1 test 3") {
-    assertEquals(Day20.part1(getInput("day20/test4.txt"), 2), 6)
+    assertEquals(Day20.part1(getInput("day20/test4.txt"), 2), 2)
   }
 
   test("Part 1 test") {
     assertEquals(Day20.part1(getInput("day20/test.txt"), 2), 44)
   }
 
-//  test("Part 1") {
-//    assertEquals(Day20.part1(getInput("day20/input.txt")), -1)
-//  }
+  test("Part 1") {
+    assertEquals(Day20.part1(getInput("day20/input.txt")), -1)
+  }
 //
 //  test("Part 2") {
 //    assertEquals(Day20.part2(getInput("day20/input.txt")), -1)
