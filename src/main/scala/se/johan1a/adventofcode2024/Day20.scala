@@ -4,55 +4,34 @@ import se.johan1a.adventofcode2024.Utils.*
 
 object Day20:
 
-  var cache = Map[(Pos, Int, Boolean), Int]()
-
   def part1(input: Seq[String], targetSaved: Int = 100): Int = part2(input, targetSaved, d = 2)
 
-  private def shortestPathCheat(
-      grid: Grid,
-      pos: Vec2,
-      dist: Int,
-      hasCheated: Boolean,
-      end: Vec2,
-      target: Int,
-      posToIndex: Map[Pos, Int]
-  ): Int =
-    if cache.contains((pos, dist, hasCheated)) then
-      val res = cache((pos, dist, hasCheated))
-      res
-    else
-      val result = if dist > target then
-        0
-      else if pos == end then
-        if dist <= target then
-          1
-        else
-          0
-      else
-        val possibleNeighbors = getNeighbors(grid, pos, hasCheated)
-        val betterNeighbors = possibleNeighbors.filter { neighbor =>
-          val i = posToIndex(neighbor._1)
-          i > posToIndex(pos)
-        }
+  def part2(input: Seq[String], targetSaved: Int = 100, d: Int = 20): Int =
+    val grid = makeGrid(input)
+    val start = find(grid, 'S').get
+    val end = find(grid, 'E').get
+    val (originalLength, originalPath) = shortestPath(grid, start, end)
+    val posToIndex = originalPath.zipWithIndex.map { (pos, i) => pos -> i }.toMap
 
-        val results = betterNeighbors
-          .map { (neighbor, cheatedNow) =>
-            val d = manhattan(pos, neighbor).toInt
-            val cheat = cheatedNow || hasCheated
-            val res = shortestPathCheat(grid, neighbor, dist + d, cheatedNow || hasCheated, end, target, posToIndex)
-            (neighbor, cheat, res)
-          }
+    var found = 0
+    originalPath.indices.reverse.foreach { i =>
+      val a = originalPath(i)
 
-        results.map(_._3).sum
-
-      if cache.contains((pos, dist, hasCheated)) && result != cache((pos, dist, hasCheated)) then
-        var x = 3
-
-      cache = cache + ((pos, dist, hasCheated) -> result)
-      result
-
-  private def isFree(grid: Grid, pos: Pos): Boolean =
-    getOpt(grid, pos).contains('.') || getOpt(grid, pos).contains('E')
+      var y = a.y - d
+      while y <= a.y + d do
+        var x = a.x - d
+        while x <= a.x + d do
+          val b = Vec2(x, y)
+          if posToIndex.contains(b) then
+            val j = posToIndex(b)
+            val pathDist = i - j
+            val manhattanDist = manhattan(a, b)
+            if manhattanDist <= d && manhattanDist < pathDist && pathDist - manhattanDist >= targetSaved then
+              found = found + 1
+          x += 1
+        y += 1
+    }
+    found
 
   private def printPath(grid: Grid, path: Seq[Vec2]) =
     grid.indices.foreach(y =>
@@ -103,6 +82,9 @@ object Day20:
       )
     result
 
+  private def isFree(grid: Grid, pos: Pos): Boolean =
+    getOpt(grid, pos).contains('.') || getOpt(grid, pos).contains('E')
+
   private def shortestPath(grid: Grid, start: Vec2, end: Vec2): (Int, Seq[Pos]) =
     var queue = Seq(start)
     var seen = Set[Pos]()
@@ -129,36 +111,10 @@ object Day20:
         }
     (dist(end), getPath(prev, end))
 
-  private def getPath(prev: Map[Pos, Pos], pos: Vec2): Seq[Pos] =
-    prev.get(pos) match
-      case None         => Seq(pos)
-      case Some(before) => getPath(prev, before) :+ pos
-
-  def part2(input: Seq[String], targetSaved: Int = 100, d: Int = 20): Int =
-    val grid = makeGrid(input)
-    val start = find(grid, 'S').get
-    val end = find(grid, 'E').get
-    val (originalLength, originalPath) = shortestPath(grid, start, end)
-    val posToIndex = originalPath.zipWithIndex.map { (pos, i) => pos -> i }.toMap
-
-    var found = 0
-    originalPath.indices.reverse.foreach { i =>
-      val a = originalPath(i)
-
-      var y = a.y - d
-      while y <= a.y + d do
-        var x = a.x - d
-        while x <= a.x + d do
-          val b = Vec2(x, y)
-          if posToIndex.contains(b) then
-            val j = posToIndex(b)
-            val pathDist = i - j
-            val manhattanDist = manhattan(a, b)
-            if manhattanDist <= d && manhattanDist < pathDist && pathDist - manhattanDist >= targetSaved then
-              found = found + 1
-          x += 1
-        y += 1
-    }
-
-    println(s"found: ${found}")
-    found
+  private def getPath(prev: Map[Pos, Pos], end: Vec2): Seq[Pos] =
+    var pos = end
+    var path = Seq(pos)
+    while prev.contains(pos) do
+      pos = prev(pos)
+      path = pos +: path
+    path
