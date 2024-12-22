@@ -56,6 +56,16 @@ class Day21Test extends munit.FunSuite:
     assertEquals(actual, 18)
   }
 
+  test("Part 1 test7") {
+    val actual = Day21.topCost(Seq('0', '2'), n = 2).toInt
+    assertEquals(actual, 30)
+  }
+
+  test("Part 1 test8") {
+    val actual = Day21.topCost("029A".toCharArray, n = 2).toInt
+    assertEquals(actual, 68)
+  }
+
   test("Part 1") {
     assertEquals(Day21.part1(getInput("day21/input.txt")), 156714L)
   }

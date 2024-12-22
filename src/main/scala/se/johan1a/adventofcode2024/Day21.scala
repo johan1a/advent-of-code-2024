@@ -41,12 +41,14 @@ object Day21:
 
   def topCost(code: Seq[Char], n: Int = 2): Long =
     val sequences = shortestSequences(code, numpad, true)
-    val bestSequence = 'A' +: sequences.head // todo get real best
-    val pairs = bestSequence.sliding(2).toSeq
-    val costs = pairs.map { pair =>
-      cost(pair.head, pair.last, n)
-    }.toSeq
-    costs.sum
+    shortestSequences(code, numpad, true).map { sequence =>
+      val modifiedSequence = 'A' +: sequence
+      val pairs = modifiedSequence.sliding(2).toSeq
+      val costs = pairs.map { pair =>
+        cost(pair.head, pair.last, n)
+      }
+      costs.sum
+    }.min
 
   private def charToPos(char: Char): Vec2 =
     // TODO cache
