@@ -61,6 +61,11 @@ class Day21Test extends munit.FunSuite:
     assertEquals(actual, 30)
   }
 
+  test("Part 1 test7b") {
+    val actual = Day21.topCost(Seq('0'), n = 3).toInt
+    assertEquals(actual, 47)
+  }
+
   test("Part 1 test8") {
     val actual = Day21.topCost("029A".toCharArray, n = 2).toInt
     assertEquals(actual, 68)
@@ -74,6 +79,7 @@ class Day21Test extends munit.FunSuite:
     assertEquals(Day21.part2(getInput("day21/test.txt")), -1L)
   }
 
-//  test("Part 2") {
-//    assertEquals(Day21.part2(getInput("day21/input.txt")), -1)
-//  }
+  // Too high 351184180821832
+  test("Part 2") {
+    assertEquals(Day21.part2(getInput("day21/input.txt")), -1L)
+  }

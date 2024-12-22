@@ -27,28 +27,29 @@ object Day21:
 
   var cache = Map[(Int, Vec2, Vec2), Long]()
 
-  def part1(input: Seq[String]): Long =
+  def part1(input: Seq[String], n: Int = 2): Long =
 
     cache = Map()
 
     input.map { line =>
       val code = line.toCharArray
-      val bottomLength = topCost(code)
+      val bottomLength = topCost(code, n)
       val c = complexity(code, bottomLength)
       println(s"code: $line, complexity: $c, length: $bottomLength")
       c
     }.sum
 
-  def topCost(code: Seq[Char], n: Int = 2): Long =
+  def topCost(code: Seq[Char], n: Int): Long =
     val sequences = shortestSequences(code, numpad, true)
-    shortestSequences(code, numpad, true).map { sequence =>
+    val topCosts = shortestSequences(code, numpad, true).map { sequence =>
       val modifiedSequence = 'A' +: sequence
       val pairs = modifiedSequence.sliding(2).toSeq
       val costs = pairs.map { pair =>
         cost(pair.head, pair.last, n)
       }
       costs.sum
-    }.min
+    }
+    topCosts.min
 
   var charToPosCache = Map[Char, Vec2]()
 
@@ -187,11 +188,4 @@ object Day21:
   private def complexity(code: Seq[Char], sequenceLength: Long): Long =
     sequenceLength * numbers(code.mkString("")).head
 
-  def part2(input: Seq[String]): Long =
-    input.map { line =>
-      val code = line.toCharArray
-      val sequence = topCost(code, n = 3)
-      val c = complexity(code, sequence)
-      println(s"code: $line, complexity: $c")
-      c
-    }.sum
+  def part2(input: Seq[String]): Long = part1(input, 25)
