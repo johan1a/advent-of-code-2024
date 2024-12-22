@@ -50,9 +50,15 @@ object Day21:
       costs.sum
     }.min
 
+  var charToPosCache = Map[Char, Vec2]()
+
   private def charToPos(char: Char): Vec2 =
-    // TODO cache
-    find(arrowsGrid, char).get
+    if charToPosCache.contains(char) then
+      charToPosCache(char)
+    else
+      val pos = find(arrowsGrid, char).get
+      charToPosCache = charToPosCache + (char -> pos)
+      pos
 
   def cost(a: Char, b: Char, n: Int): Long =
     cost(charToPos(a), charToPos(b), n)
@@ -95,10 +101,17 @@ object Day21:
     }
     sequences
 
-  // todo cache
+  var pathCache = Map[(Int, Pos, Pos), Seq[Char]]()
+
   def shortestPath(gridType: Int, start: Pos, end: Pos, multiple: Boolean): Seq[Char] =
-    val paths = shortestPaths(gridType, start, end, true)
-    paths.maxBy(p => score(p))
+    val state = (gridType, start, end)
+    if pathCache.contains(state) then
+      pathCache(state)
+    else
+      val paths = shortestPaths(gridType, start, end, true)
+      val best = paths.maxBy(p => score(p))
+      pathCache = pathCache + (state -> best)
+      best
 
   def score(path: Seq[Char]) =
     var i = 1
