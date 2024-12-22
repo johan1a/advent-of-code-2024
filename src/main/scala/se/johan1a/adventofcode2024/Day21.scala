@@ -41,8 +41,9 @@ object Day21:
 
   def topCost(code: Seq[Char], n: Int = 2): Long =
     val sequences = shortestSequences(code, numpad, true)
-    val bestSequence = sequences.head // todo get real best
-    val costs = bestSequence.sliding(2).map { pair =>
+    val bestSequence = 'A' +: sequences.head // todo get real best
+    val pairs = bestSequence.sliding(2).toSeq
+    val costs = pairs.map { pair =>
       cost(pair.head, pair.last, n)
     }.toSeq
     costs.sum
@@ -62,13 +63,16 @@ object Day21:
       val sequence = 'A' +: shortestPath(arrows, a, b, true) :+ 'A'
       if n == 1 then
         // TODO check
-        sequence.size - 1
+        val result = sequence.size - 1
+        println(s"  1: $result")
+        result
       else
         val pairs = sequence.sliding(2).toSeq
         val result = pairs.map(pair =>
           cost(pair.head, pair.last, n - 1)
         ).sum
         cache = cache + (key -> result)
+        println(s"$n: $result")
         result
 
   def shortestSequences(code: Seq[Char], gridType: Int, multiple: Boolean): Seq[Seq[Char]] =
@@ -89,8 +93,19 @@ object Day21:
     }
     sequences
 
+  // todo cache
   def shortestPath(gridType: Int, start: Pos, end: Pos, multiple: Boolean): Seq[Char] =
-    shortestPaths(gridType, start, end, false).head
+    val paths = shortestPaths(gridType, start, end, true)
+    paths.maxBy(p => score(p))
+
+  def score(path: Seq[Char]) =
+    var i = 1
+    var score = 0
+    while i < path.length do
+      if path(i) != path(i - 1) then
+        score = score - 1
+      i += 1
+    score
 
   def shortestPaths(gridType: Int, start: Pos, end: Pos, multiple: Boolean): Seq[Seq[Char]] =
     val paths = shortestPaths(gridType, start, end)

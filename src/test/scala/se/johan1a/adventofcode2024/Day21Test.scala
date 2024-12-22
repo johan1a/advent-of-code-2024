@@ -41,8 +41,18 @@ class Day21Test extends munit.FunSuite:
     assertEquals(actual, 10)
   }
 
+  test("Part 1 test4b") {
+    val actual = Day21.topCost(Seq('0'), n = 1).toInt
+    assertEquals(actual, 8)
+  }
+
   test("Part 1 test5") {
-    val actual = Day21.topCost(Seq('0', '2'), n = 2).toInt
+    val actual = Day21.topCost(Seq('0', '2'), n = 1).toInt
+    assertEquals(actual, 12)
+  }
+
+  test("Part 1 test6") {
+    val actual = Day21.topCost(Seq('0'), n = 2).toInt
     assertEquals(actual, 18)
   }
 
