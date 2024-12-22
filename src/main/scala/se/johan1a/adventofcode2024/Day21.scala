@@ -55,15 +55,15 @@ object Day21:
     cost(charToPos(a), charToPos(b), n)
 
   def cost(a: Vec2, b: Vec2, n: Int): Long =
-    if n == 0 then
-      // TODO check
-      1
+    val key = (n, a, b)
+    if cache.contains(key) then
+      cache(key)
     else
-      val key = (n, a, b)
-      if cache.contains(key) then
-        cache(key)
+      val sequence = 'A' +: shortestPath(arrows, a, b, true) :+ 'A'
+      if n == 1 then
+        // TODO check
+        sequence.size - 1
       else
-        val sequence = 'A' +: shortestPath(arrows, a, b, true) :+ 'A'
         val pairs = sequence.sliding(2).toSeq
         val result = pairs.map(pair =>
           cost(pair.head, pair.last, n - 1)
