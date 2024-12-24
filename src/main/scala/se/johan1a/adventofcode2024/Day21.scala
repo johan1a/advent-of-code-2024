@@ -29,6 +29,8 @@ object Day21:
 
   def part1(input: Seq[String], n: Int = 2): Long =
 
+    charToPosCache = Map[Char, Vec2]()
+    pathCache = Map[(Int, Pos, Pos), Seq[Char]]()
     cache = Map()
 
     input.map { line =>
@@ -73,7 +75,7 @@ object Day21:
       if n == 1 then
         // TODO check
         val result = sequence.size - 1
-        println(s"  1: $result")
+//        println(s"  1: $result")
         result
       else
         val pairs = sequence.sliding(2).toSeq
@@ -81,7 +83,7 @@ object Day21:
           cost(pair.head, pair.last, n - 1)
         ).sum
         cache = cache + (key -> result)
-        println(s"$n: $result")
+//        println(s"$n: $result")
         result
 
   def shortestSequences(code: Seq[Char], gridType: Int, multiple: Boolean): Seq[Seq[Char]] =

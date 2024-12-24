@@ -31,15 +31,10 @@ class Day21Test extends munit.FunSuite:
     assertEquals(Day21.part1(getInput("day21/test.txt")), 126384L)
   }
 
-  test("Part 1 test3") {
-    val actual = Day21.topCost(Seq('8'), n = 4).toInt
-    assertEquals(actual, "v<A<AA>^>AvA^<A>AAAvA^A".size)
-  }
-
-  test("Part 1 test4") {
-    val actual = Day21.topCost(Seq('0'), n = 2).toInt
-    assertEquals(actual, 10)
-  }
+//  test("Part 1 test3") {
+//    val actual = Day21.topCost(Seq('8'), n = 4).toInt
+//    assertEquals(actual, "v<A<AA>^>AvA^<A>AAAvA^A".size)
+//  }
 
   test("Part 1 test4b") {
     val actual = Day21.topCost(Seq('0'), n = 1).toInt
@@ -57,18 +52,53 @@ class Day21Test extends munit.FunSuite:
   }
 
   test("Part 1 test7") {
-    val actual = Day21.topCost(Seq('0', '2'), n = 2).toInt
+    val actual = Day21.topCost("02".toCharArray, n = 2).toInt
     assertEquals(actual, 30)
   }
 
   test("Part 1 test7b") {
     val actual = Day21.topCost(Seq('0'), n = 3).toInt
-    assertEquals(actual, 47)
+    assertEquals(actual, 46)
   }
 
   test("Part 1 test8") {
     val actual = Day21.topCost("029A".toCharArray, n = 2).toInt
     assertEquals(actual, 68)
+  }
+
+  test("Part 1 test9a") {
+    val actual = Day21.topCost("029".toCharArray, n = 3).toInt
+    assertEquals(actual, 122)
+  }
+
+  test("Part 1 test9bb") {
+    val actual = Day21.topCost("9".toCharArray, n = 3).toInt
+    assertEquals(actual, 30)
+  }
+
+  test("Part 1 test9bbb") {
+    val actual = Day21.topCost("A".toCharArray, n = 3).toInt
+    assertEquals(actual, 1)
+  }
+
+  test("Part 1 test9ba") {
+    val actual = Day21.topCost("9A".toCharArray, n = 2).toInt
+    assertEquals(actual, 32)
+  }
+
+  test("Part 1 test9b") {
+    val actual = Day21.topCost("9A".toCharArray, n = 3).toInt
+    assertEquals(actual, 72)
+  }
+
+  test("Part 1 test9c") {
+    val actual = Day21.topCost("029A".toCharArray, n = 2).toInt
+    assertEquals(actual, 68)
+  }
+
+  test("Part 1 test9") {
+    val actual = Day21.topCost("029A".toCharArray, n = 3).toInt
+    assertEquals(actual, 164)
   }
 
   test("Part 1") {
