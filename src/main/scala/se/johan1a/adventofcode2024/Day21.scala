@@ -7,7 +7,7 @@ object Day21:
   val numpad = 0
   val arrows = 1
 
-  val numpadGrid =
+  private val numpadGrid =
     makeGrid(
       """#####
       |#789#
@@ -17,7 +17,7 @@ object Day21:
       |#####""".stripMargin.split("\n")
     )
 
-  val arrowsGrid = makeGrid(
+  private val arrowsGrid = makeGrid(
     """#####
       |##^A#
       |#<v>#
@@ -25,59 +25,43 @@ object Day21:
       |""".stripMargin.split("\n")
   )
 
-  private var cache = Map[(Int, Vec2, Vec2), Long]()
-  private var charToPosCache = Map[Char, Vec2]()
+  private var scoreCache = Map[(Int, Vec2, Vec2), Long]()
+  private var pathCache = Map[(Int, Pos, Pos), Seq[Seq[Char]]]()
 
   def part1(input: Seq[String], n: Int = 2): Long =
-
-    charToPosCache = Map[Char, Vec2]()
-    pathCache = Map[(Int, Pos, Pos), Seq[Seq[Char]] ]()
-    cache = Map()
-
     input.map { line =>
       val code = line.toCharArray
-      val bottomLength = topCost(code, n)
-      val c = complexity(code, bottomLength)
-      println(s"code: $line, complexity: $c, length: $bottomLength")
-      c
+      val cost = topCost(code, n)
+      complexity(code, cost)
     }.sum
 
+  def part2(input: Seq[String]): Long = part1(input, 25)
+
   def topCost(code: Seq[Char], n: Int): Long =
-    val sequences = shortestSequences(code, numpad, true)
-    val topCosts = shortestSequences(code, numpad, true).map { sequence =>
+    val sequences = shortestSequences(code, numpad)
+    val topCosts = shortestSequences(code, numpad).map { sequence =>
       val modifiedSequence = 'A' +: sequence
-      val pairs = modifiedSequence.sliding(2).toSeq
-      val costs = pairs.map { pair =>
+      modifiedSequence.sliding(2).toSeq.map { pair =>
         cost(pair.head, pair.last, n)
-      }
-      costs.sum
+      }.sum
     }
     topCosts.min
-
-
-  private def charToPos(char: Char): Vec2 =
-    if charToPosCache.contains(char) then
-      charToPosCache(char)
-    else
-      val pos = find(arrowsGrid, char).get
-      charToPosCache = charToPosCache + (char -> pos)
-      pos
 
   def cost(a: Char, b: Char, n: Int): Long =
     cost(charToPos(a), charToPos(b), n)
 
+  private def charToPos(char: Char): Vec2 =
+    find(arrowsGrid, char).get
+
   def cost(a: Vec2, b: Vec2, n: Int): Long =
     val key = (n, a, b)
-    if cache.contains(key) then
-      cache(key)
+    if scoreCache.contains(key) then
+      scoreCache(key)
     else
       val results: Seq[Long] = shortestPathsCached(arrows, a, b).map { path =>
         val sequence = 'A' +: path :+ 'A'
         if n == 1 then
-          // TODO check
-          val result = sequence.size - 1
-          //        println(s"  1: $result")
-          result
+          sequence.size - 1
         else
           val pairs = sequence.sliding(2).toSeq
           val result = pairs.map(pair =>
@@ -86,16 +70,16 @@ object Day21:
           result
       }
       val best = results.min
-      cache = cache + (key -> best)
+      scoreCache = scoreCache + (key -> best)
       best
 
-  def shortestSequences(code: Seq[Char], gridType: Int, multiple: Boolean): Seq[Seq[Char]] =
+  def shortestSequences(code: Seq[Char], gridType: Int): Seq[Seq[Char]] =
     val grid = if gridType == numpad then numpadGrid else arrowsGrid
     var pos = find(grid, 'A').get
     var sequences = Seq[Seq[Char]]()
     code.foreach { targetChar =>
       val target = find(grid, targetChar).get
-      val paths = shortestPaths(gridType, pos, target, multiple)
+      val paths = shortestPaths(gridType, pos, target)
       val pathsWithA = paths.map(s => s :+ 'A')
       sequences = pathsWithA.flatMap(path =>
         if sequences.isEmpty then
@@ -107,18 +91,16 @@ object Day21:
     }
     sequences
 
-  var pathCache = Map[(Int, Pos, Pos), Seq[Seq[Char]]]()
-
-  def shortestPathsCached(gridType: Int, start: Pos, end: Pos): Seq[Seq[Char]] =
+  private def shortestPathsCached(gridType: Int, start: Pos, end: Pos): Seq[Seq[Char]] =
     val state = (gridType, start, end)
     if pathCache.contains(state) then
       pathCache(state)
     else
-      val paths = shortestPaths(gridType, start, end, true)
+      val paths = shortestPaths(gridType, start, end)
       pathCache = pathCache + (state -> paths)
       paths
 
-  def score(path: Seq[Char]) =
+  private def score(path: Seq[Char]) =
     var i = 1
     var score = 0
     while i < path.length do
@@ -126,13 +108,6 @@ object Day21:
         score = score - 1
       i += 1
     score
-
-  def shortestPaths(gridType: Int, start: Pos, end: Pos, multiple: Boolean): Seq[Seq[Char]] =
-    val paths = shortestPaths(gridType, start, end)
-    if multiple then
-      paths
-    else
-      paths.take(1)
 
   def shortestPaths(gridType: Int, start: Pos, end: Pos): Seq[Seq[Char]] =
     val grid = if gridType == numpad then numpadGrid else arrowsGrid
@@ -159,9 +134,8 @@ object Day21:
               prev = prev + (neighbor -> (prev.getOrElse(neighbor, Seq.empty) :+ pos))
               queue = queue :+ neighbor
           }
-    val sequences = getSequences(prev, end)
-    val result = sequences.map(getCharSequence)
-    result
+    val path = getPath(prev, end)
+    path.map(getCharSequence)
 
   private def getCharSequence(sequence: Seq[Pos]): Seq[Char] =
     if sequence.size < 2 then
@@ -173,10 +147,10 @@ object Day21:
         charDir(a, b)
       )
 
-  private def getSequences(prev: Map[Pos, Seq[Pos]], pos: Pos): Seq[Seq[Pos]] =
+  private def getPath(prev: Map[Pos, Seq[Pos]], pos: Pos): Seq[Seq[Pos]] =
     prev.getOrElse(pos, Seq.empty) match
       case Seq()             => Seq(Seq(pos))
-      case befores: Seq[Pos] => befores.flatMap(before => getSequences(prev, before).map(_ :+ pos))
+      case befores: Seq[Pos] => befores.flatMap(before => getPath(prev, before).map(_ :+ pos))
 
   private def charDir(a: Pos, b: Pos) =
     if a leftOf b then
@@ -191,5 +165,3 @@ object Day21:
 
   private def complexity(code: Seq[Char], sequenceLength: Long): Long =
     sequenceLength * numbers(code.mkString("")).head
-
-  def part2(input: Seq[String]): Long = part1(input, 25)
