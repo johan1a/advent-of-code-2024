@@ -25,12 +25,13 @@ object Day21:
       |""".stripMargin.split("\n")
   )
 
-  var cache = Map[(Int, Vec2, Vec2), Long]()
+  private var cache = Map[(Int, Vec2, Vec2), Long]()
+  private var charToPosCache = Map[Char, Vec2]()
 
   def part1(input: Seq[String], n: Int = 2): Long =
 
     charToPosCache = Map[Char, Vec2]()
-    pathCache = Map[(Int, Pos, Pos), Seq[Char]]()
+    pathCache = Map[(Int, Pos, Pos), Seq[Seq[Char]] ]()
     cache = Map()
 
     input.map { line =>
@@ -53,7 +54,6 @@ object Day21:
     }
     topCosts.min
 
-  var charToPosCache = Map[Char, Vec2]()
 
   private def charToPos(char: Char): Vec2 =
     if charToPosCache.contains(char) then
@@ -71,20 +71,23 @@ object Day21:
     if cache.contains(key) then
       cache(key)
     else
-      val sequence = 'A' +: shortestPath(arrows, a, b, true) :+ 'A'
-      if n == 1 then
-        // TODO check
-        val result = sequence.size - 1
-//        println(s"  1: $result")
-        result
-      else
-        val pairs = sequence.sliding(2).toSeq
-        val result = pairs.map(pair =>
-          cost(pair.head, pair.last, n - 1)
-        ).sum
-        cache = cache + (key -> result)
-//        println(s"$n: $result")
-        result
+      val results: Seq[Long] = shortestPathsCached(arrows, a, b).map { path =>
+        val sequence = 'A' +: path :+ 'A'
+        if n == 1 then
+          // TODO check
+          val result = sequence.size - 1
+          //        println(s"  1: $result")
+          result
+        else
+          val pairs = sequence.sliding(2).toSeq
+          val result = pairs.map(pair =>
+            cost(pair.head, pair.last, n - 1)
+          ).sum
+          result
+      }
+      val best = results.min
+      cache = cache + (key -> best)
+      best
 
   def shortestSequences(code: Seq[Char], gridType: Int, multiple: Boolean): Seq[Seq[Char]] =
     val grid = if gridType == numpad then numpadGrid else arrowsGrid
@@ -104,17 +107,16 @@ object Day21:
     }
     sequences
 
-  var pathCache = Map[(Int, Pos, Pos), Seq[Char]]()
+  var pathCache = Map[(Int, Pos, Pos), Seq[Seq[Char]]]()
 
-  def shortestPath(gridType: Int, start: Pos, end: Pos, multiple: Boolean): Seq[Char] =
+  def shortestPathsCached(gridType: Int, start: Pos, end: Pos): Seq[Seq[Char]] =
     val state = (gridType, start, end)
     if pathCache.contains(state) then
       pathCache(state)
     else
       val paths = shortestPaths(gridType, start, end, true)
-      val best = paths.maxBy(p => score(p))
-      pathCache = pathCache + (state -> best)
-      best
+      pathCache = pathCache + (state -> paths)
+      paths
 
   def score(path: Seq[Char]) =
     var i = 1
