@@ -108,6 +108,10 @@ object Utils:
       while i < input.size && isEmpty(input(i)) do i += 1
     groups
 
+  def splitOnce(str: String, pattern: String): (String, String) =
+    val splitted = str.split(pattern)
+    (splitted.head, splitted.last)
+
   def inRange(grid: Grid, pos: Vec2): Boolean =
     val min = Vec2(0, 0)
     val max = Vec2(grid.size, grid.head.size)
