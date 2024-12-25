@@ -9,32 +9,62 @@ object Day22:
     results.sum
 
   def part2(input: Seq[String]): Long =
-    val allDiffs = input.map(line =>
+    var j = 0
+    var allDiffs: Seq[Seq[Diff]] = input.map(line =>
       val secrets = getSecrets(line.toLong, 2000)
       val prices = secrets.map(n => n % 10)
       val diffs = getDiffs(prices)
-      diffs
+      val sorted = sort(diffs)
+      println(s"j: $j")
+      j += 1
+      sorted
     )
 
-    var i = 0
-    val others = allDiffs.drop(1)
-    val first = allDiffs.head
     var best = 0L
     var bestSequence = Seq[Long]()
-    while i < first.size do
-      val diff = first(i)
-      val firstPrice = diff.price
-      val sum = firstPrice + others.map(otherDiffs =>
-        otherDiffs.find(_._1 == diff.diffs).map(_.price).getOrElse(0L)
-      ).sum
+
+    var seen = Set[Seq[Long]]()
+    println("Start")
+
+    var i = 0
+    while allDiffs.nonEmpty do
+      if i % 100 == 0 then
+        println(i)
+      i += 1
+      val firstElements = allDiffs.map(d => d.head)
+      val firstDiff = firstElements.minBy(nn => (nn.diffs(0), nn.diffs(1), nn.diffs(2), nn.diffs(3)))
+      assert(!seen.contains(firstDiff.diffs))
+      seen = seen + firstDiff.diffs
+      val sum = firstElements.filter(_.diffs == firstDiff.diffs).map(_.price).sum
       if sum > best then
         best = sum
-        bestSequence = diff.diffs
+        bestSequence = firstDiff.diffs
+      allDiffs = allDiffs.map { diffs =>
+        if diffs.head.diffs == firstDiff.diffs then
+          diffs.drop(1)
+        else
+          diffs
+      }
+      allDiffs = allDiffs.filter(_.nonEmpty)
 
-      i += 1
+    println(s"best: $best, best sequence: $bestSequence")
     best
 
   case class Diff(diffs: Seq[Long], price: Long)
+
+  private def sort(diffs: Seq[Diff]) =
+    val withoutDuplicates = removeDuplicates(diffs)
+    withoutDuplicates.sortBy(nn => (nn.diffs(0), nn.diffs(1), nn.diffs(2), nn.diffs(3)))
+
+  private def removeDuplicates(diffs: Seq[Diff]) =
+    var seen = Set[Seq[Long]]()
+    var without = Seq[Diff]()
+    diffs.foreach(diff =>
+      if !seen.contains(diff.diffs) then
+        without = without :+ diff
+        seen = seen + diff.diffs
+    )
+    without
 
   private def getDiffs(prices: Seq[Long]): Seq[Diff] =
     prices.sliding(5).map { nn =>
