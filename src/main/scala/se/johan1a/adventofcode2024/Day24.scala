@@ -152,45 +152,6 @@ object Day24:
     ops.put(a, ops(b))
     ops.put(b, temp)
 
-  private def getPossibleToSwap(refs: Seq[String], badOutputs: Seq[String], used: Map[String, Set[String]]) =
-    val goodOutputs = refs.filter(r => r.startsWith("z") && !badOutputs.contains(r))
-    refs.filter { ref =>
-      val gatesUsed = used.getOrElse(ref, Set.empty)
-      goodOutputs.forall(goodOutput =>
-        !gatesUsed.contains(goodOutput)
-      )
-    }
-
-  private def getBadOutputs(ops: mutable.Map[String, Op], x: Long, y: Long, analyze: Boolean = true): Seq[String] =
-    try
-      val expectedBits = getPrefixedBits(x + y, "z")
-      val expected = parseBits(expectedBits)
-      assert(expected == x + y)
-
-      val bits = doCompute(ops, x, y, analyze)
-      val badOutputs = bits.zip(expectedBits).filter { case (actual: (String, String), expected: (String, String)) =>
-        actual._2 != expected._2
-      }.map(_._1._1).toArray
-      badOutputs
-    catch
-      case e: Exception => ops.keys.filter(_.startsWith("z")).toSeq
-
-  private def doCompute(
-      ops: mutable.Map[String, Op],
-      x: Long,
-      y: Long,
-      analyze: Boolean = true
-  ): Seq[(String, String)] =
-    usedBy = Map()
-    results = Map()
-    put(ops, x, "x")
-    put(ops, y, "y")
-    val bits = computeToBits(ops, analyze)
-    bits
-
-  private def parseBits(bits: Seq[(String, String)]) =
-    java.lang.Long.parseLong(bits.map(_._2).reverse.mkString, 2)
-
   private def put(ops: mutable.Map[String, Op], k: Long, prefix: String): Unit =
     val refs = ops.keys.toSeq.filter(_.startsWith(prefix))
     refs.foreach(ref =>
@@ -204,55 +165,22 @@ object Day24:
   def getPrefixedBits(k: Long, prefix: String): Seq[(String, String)] =
     k.toBinaryString.reverse.zipWithIndex.map { case (char, i) => getRef(i, prefix) -> char.toString }
 
-  private def parseLiterals(ops: Seq[Op], prefix: String): Long =
-    java.lang.Long.parseLong(
-      ops.sortBy(_.ref).reverse.filter(_.ref.startsWith(prefix)).collect { case Literal(ref, value) =>
-        if value then "1" else "0"
-      }.mkString,
-      2
-    )
-
-  var usedBy: Map[String, Set[String]] = Map()
-  var results: Map[String, String] = Map()
-
-  private def computeToBits(ops: mutable.Map[String, Op], analyze: Boolean = true) =
-    usedBy = Map()
-    results = Map()
-    val zRefs = ops.keys.filter(_.startsWith("z")).toSeq.sorted.reverse
-    zRefs.map(ref => (ref, if compute(ops, ref, ref, analyze) then "1" else "0")).reverse
-
   private def getRef(i: Int, prefix: String) =
     if i <= 9 then
       s"${prefix}0$i"
     else
       s"$prefix$i"
 
-  val maxDepth = 1000
-
   private def compute(
       refs: mutable.Map[String, Op],
       ref: String,
-      topRef: String,
-      analyze: Boolean = true,
-      depth: Int = 0
+      topRef: String
   ): Boolean =
-    if depth > maxDepth then
-      throw Exception("max depth reached")
-    if analyze then
-      val used: Set[String] = usedBy.getOrElse(ref, Set.empty)
-      usedBy = usedBy + (ref -> (used + topRef))
-
-    val op = refs(ref)
-    val result = op match
+    refs(ref) match
       case Literal(ref, value) => value
-      case And(ref, a, b) => compute(refs, a, topRef, depth = depth + 1) && compute(refs, b, topRef, depth = depth + 1)
-      case Or(ref, a, b)  => compute(refs, a, topRef, depth = depth + 1) || compute(refs, b, topRef, depth = depth + 1)
-      case Xor(ref, a, b) => compute(refs, a, topRef, depth = depth + 1) ^ compute(refs, b, topRef, depth = depth + 1)
-
-    if analyze then
-      results = results + (ref -> (if result then "1" else "0"))
-
-    result
+      case And(ref, a, b)      => compute(refs, a, topRef) && compute(refs, b, topRef)
+      case Or(ref, a, b)       => compute(refs, a, topRef) || compute(refs, b, topRef)
+      case Xor(ref, a, b)      => compute(refs, a, topRef) ^ compute(refs, b, topRef)
 
   private def parse(input: Seq[String]): Seq[Op] =
     val splitted = split(input)
