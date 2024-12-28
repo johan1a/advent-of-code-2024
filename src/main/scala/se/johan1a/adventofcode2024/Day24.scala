@@ -24,7 +24,7 @@ object Day24:
 
   def part2(input: Seq[String], n: Int = 4): String =
     val opSeq = parse(input)
-    val refs: Seq[String] = opSeq.map(_.ref)
+    val refs: Seq[String] = opSeq.map(_.ref).toArray
     val ops: mutable.Map[String, Op] = mutable.Map[String, Op]() // opSeq.map(op => op.ref -> op).toMap
     opSeq.foreach { op =>
       ops.put(op.ref, op)
@@ -32,59 +32,42 @@ object Day24:
     val nbrZ = refs.count(_.startsWith("z"))
 
     val allOnes: Long = java.lang.Long.parseLong(0.until(nbrZ).map(_ => "1").mkString, 2)
-    val badOutputs = getBadOutputs(ops, allOnes, 0L)
+    val badOutputs = getBadOutputs(ops, allOnes, 8L)
 
-    val possible = getPossibleToSwap(refs, badOutputs, usedBy)
-    val combinations = getCombinations(possible)
-    val combinationsWithDifferentOutput = combinations.filter { (a, b) =>
-      results.get(a) != results.get(b)
+    // Z = a XOR b
+//    candidates:
+    // mvs AND jvj -> z10
+    // ??? vjh OR fhq -> z14
+    // (z10,And(z10,mvs,jvj))
+    // (z34,And(z34,y34,x34))
+    // (z14,Or(z14,vjh,fhq))
+    // z00,z01,z02,z05
+
+    0.until(nbrZ).foreach { z =>
+      println(z)
+      val a = Math.pow(2, z).toLong
+      val b = 0
+
+      if z == 10 then
+        var x = 3
+      var bits = doCompute(ops, a, b)
+
+      val xUsed: Option[Set[String]] = usedBy.get(getRef(z, "x"))
+      val zRef = getRef(z, "z")
+      assert(xUsed.isDefined)
+      assert(xUsed.get.contains(zRef))
+      val yUsed: Option[Set[String]] = usedBy.get(getRef(z, "y"))
+      assert(yUsed.isDefined)
+      assert(yUsed.get.contains(zRef))
+
+      assert(bits(z)._2 == "1")
+      bits = doCompute(ops, b, a)
+      assert(bits(z)._2 == "1")
+
+      println(s"${zRef} ok")
     }
 
-    var best = badOutputs
-
-    var i = 0
-    val cdo = combinationsWithDifferentOutput
-    while i < cdo.size do
-      println(s"i: $i")
-      var j = i + 1
-      while j < cdo.size && cdo(j)._1 == cdo(i)._1 do
-        j += 1
-      while j < cdo.size do
-        println(s"j: $j / ${cdo.size}")
-        var k = j + 1
-        while k < cdo.size && cdo(k)._1 == cdo(j)._1 do
-          k += 1
-        while k < cdo.size do
-          println(s"i: $i, j: $j, k: $k / ${cdo.size}")
-          var l = k + 1
-
-          while l < cdo.size && cdo(l)._1 == cdo(k)._1 do
-            l += 1
-
-          while l < cdo.size do
-            val allUsed = (((Seq(cdo(i)) :+ cdo(j)) :+ cdo(k)) :+ cdo(l)).flatMap(pair => Seq(pair._1, pair._2))
-
-            if allUsed.distinct.size == 8 then
-              swap(ops, cdo(i)._1, cdo(i)._2)
-              swap(ops, cdo(j)._1, cdo(j)._2)
-              swap(ops, cdo(k)._1, cdo(k)._2)
-              swap(ops, cdo(l)._1, cdo(l)._2)
-              val badOutputs = getBadOutputs(ops, allOnes, 0L, analyze = false)
-              if badOutputs.size < best.size then
-                println(s"new best: ${badOutputs.size}")
-                best = badOutputs
-              if badOutputs.isEmpty then
-                return allUsed.sorted.mkString(",")
-              swap(ops, cdo(i)._2, cdo(i)._1)
-              swap(ops, cdo(j)._2, cdo(j)._1)
-              swap(ops, cdo(k)._2, cdo(k)._1)
-              swap(ops, cdo(l)._2, cdo(l)._1)
-            l += 1
-          k += 1
-        j += 1
-      i += 1
-
-    ""
+    "-1"
 
   private def swap(ops: mutable.Map[String, Op], a: String, b: String) =
     val temp = ops(a)
@@ -110,17 +93,32 @@ object Day24:
     }
 
   private def getBadOutputs(ops: mutable.Map[String, Op], x: Long, y: Long, analyze: Boolean = true): Seq[String] =
+    try
+
+      val expectedBits = getPrefixedBits(x + y, "z")
+      val expected = parseBits(expectedBits)
+      assert(expected == x + y)
+
+      val bits = doCompute(ops, x, y, analyze)
+      val badOutputs = bits.zip(expectedBits).filter { case (actual: (String, String), expected: (String, String)) =>
+        actual._2 != expected._2
+      }.map(_._1._1).toArray
+      badOutputs
+    catch
+      case e: Exception => ops.keys.filter(_.startsWith("z")).toSeq
+
+  private def doCompute(
+      ops: mutable.Map[String, Op],
+      x: Long,
+      y: Long,
+      analyze: Boolean = true
+  ): Seq[(String, String)] =
+    usedBy = Map()
+    results = Map()
     put(ops, x, "x")
     put(ops, y, "y")
-    val expectedBits = getPrefixedBits(x + y, "z")
-    val expected = parseBits(expectedBits)
-    assert(expected == x + y)
-
     val bits = computeToBits(ops, analyze)
-    val badOutputs = bits.zip(expectedBits).filter { case (actual: (String, String), expected: (String, String)) =>
-      actual._2 != expected._2
-    }.map(_._1._1)
-    badOutputs
+    bits
 
   private def parseBits(bits: Seq[(String, String)]) =
     java.lang.Long.parseLong(bits.map(_._2).reverse.mkString, 2)
@@ -162,16 +160,27 @@ object Day24:
     else
       s"$prefix$i"
 
-  private def compute(refs: mutable.Map[String, Op], ref: String, topRef: String, analyze: Boolean = true): Boolean =
+  val maxDepth = 1000
+
+  private def compute(
+      refs: mutable.Map[String, Op],
+      ref: String,
+      topRef: String,
+      analyze: Boolean = true,
+      depth: Int = 0
+  ): Boolean =
+    if depth > maxDepth then
+      throw Exception("max depth reached")
     if analyze then
       val used: Set[String] = usedBy.getOrElse(ref, Set.empty)
       usedBy = usedBy + (ref -> (used + topRef))
 
-    val result = refs(ref) match
+    val op = refs(ref)
+    val result = op match
       case Literal(ref, value) => value
-      case And(ref, a, b)      => compute(refs, a, topRef) && compute(refs, b, topRef)
-      case Or(ref, a, b)       => compute(refs, a, topRef) || compute(refs, b, topRef)
-      case Xor(ref, a, b)      => compute(refs, a, topRef) ^ compute(refs, b, topRef)
+      case And(ref, a, b) => compute(refs, a, topRef, depth = depth + 1) && compute(refs, b, topRef, depth = depth + 1)
+      case Or(ref, a, b)  => compute(refs, a, topRef, depth = depth + 1) || compute(refs, b, topRef, depth = depth + 1)
+      case Xor(ref, a, b) => compute(refs, a, topRef, depth = depth + 1) ^ compute(refs, b, topRef, depth = depth + 1)
 
     if analyze then
       results = results + (ref -> (if result then "1" else "0"))
