@@ -1,7 +1,9 @@
 package se.johan1a.adventofcode2024
 
 import se.johan1a.adventofcode2024.Utils.{split, splitOnce}
+
 import scala.collection.mutable
+import scala.util.Random
 
 object Day24:
 
@@ -26,15 +28,33 @@ object Day24:
     opSeq.foreach { op =>
       ops.put(op.ref, op)
     }
-    val zRefs = refs.filter(_.startsWith("z")).sorted.reverse
-    val x = parseLiterals(opSeq, "x")
-    val y = parseLiterals(opSeq, "y")
-    findFlipped(ops, zRefs, x, y, n).flatMap(tuple => Seq(tuple._1, tuple._2)).sorted.mkString(",")
+    val nbrZ = refs.count(_.startsWith("z"))
+
+    val allOnes: Long = java.lang.Long.parseLong(0.until(nbrZ).map(_ => "1").mkString, 2)
+    val badOutputs = getBadOutputs(ops, allOnes, 0L)
+
+    ""
+
+  private def getBadOutputs(ops: mutable.Map[String, Op], x: Long, y: Long): Seq[String] =
+    put(ops, x, "x")
+    put(ops, y, "y")
+    val expectedBits = getPrefixedBits(x + y, "z")
+    val expected = parseBits(expectedBits)
+    assert(expected == x + y)
+
+    val bits = computeToBits(ops.toMap)
+    val badOutputs = bits.zip(expectedBits).filter { case (actual: (String, String), expected: (String, String)) =>
+      actual._2 != expected._2
+    }.map(_._1._1)
+    badOutputs
+
+  private def parseBits(bits: Seq[(String, String)]) =
+    java.lang.Long.parseLong(bits.map(_._2).reverse.mkString, 2)
 
   private def put(ops: mutable.Map[String, Op], k: Long, prefix: String): Unit =
     val refs = ops.keys.toSeq.filter(_.startsWith(prefix))
     refs.foreach(ref =>
-      ops.remove(ref)
+      ops.put(ref, Literal(ref, false))
     )
     val kBits = getPrefixedBits(k, prefix)
     kBits.foreach { (ref, value) =>
@@ -52,21 +72,9 @@ object Day24:
       2
     )
 
-  private def findFlipped(
-      ops: mutable.Map[String, Op],
-      zRefs: Seq[String],
-      x: Long,
-      y: Long,
-      n: Int
-  ): Seq[(String, String)] =
-    val expectedBits = getPrefixedBits(x + y, "z")
-    val bits = computeToBits(ops.toMap, zRefs)
-    val sum = java.lang.Long.parseLong(bits, 2)
-    sum == x + y
-    Seq.empty
-
-  private def computeToBits(ops: Map[String, Op], zRefs: Seq[String]) =
-    zRefs.map(ref => compute(ops, ref)).map(b => if b then "1" else "0").mkString
+  private def computeToBits(ops: Map[String, Op]) =
+    val zRefs = ops.keys.filter(_.startsWith("z")).toSeq.sorted.reverse
+    zRefs.map(ref => (ref, if compute(ops, ref) then "1" else "0")).reverse
 
   // 001001
   private def getRef(i: Int, prefix: String) =
