@@ -2,18 +2,25 @@ package se.johan1a.adventofcode2024
 
 import se.johan1a.adventofcode2024.Utils.{split, splitOnce}
 
+import java.nio.charset.StandardCharsets
+import java.nio.file.{Files, Paths, StandardOpenOption}
 import scala.collection.mutable
-import scala.util.Random
+import scala.util.Try
 
 object Day24:
 
   sealed trait Op:
     def ref: String
+    def opType: String
 
-  case class Literal(ref: String, value: Boolean) extends Op
-  case class And(ref: String, a: String, b: String) extends Op
-  case class Or(ref: String, a: String, b: String) extends Op
-  case class Xor(ref: String, a: String, b: String) extends Op
+  case class Literal(ref: String, value: Boolean) extends Op:
+    def opType = "literal"
+  case class And(ref: String, a: String, b: String) extends Op:
+    def opType = "And"
+  case class Or(ref: String, a: String, b: String) extends Op:
+    def opType = "Or"
+  case class Xor(ref: String, a: String, b: String) extends Op:
+    def opType = "Xor"
 
   def part1(input: Seq[String]): Long =
     val ops = mutable.Map[String, Op]()
@@ -31,43 +38,119 @@ object Day24:
     }
     val nbrZ = refs.count(_.startsWith("z"))
 
-    val allOnes: Long = java.lang.Long.parseLong(0.until(nbrZ).map(_ => "1").mkString, 2)
-    val badOutputs = getBadOutputs(ops, allOnes, 8L)
+    val a = Math.pow(2, 10).toLong
+    val b = 1L
+    val badOutputs = getBadOutputs(ops, a, b)
 
-    // Z = a XOR b
-//    candidates:
-    // mvs AND jvj -> z10
-    // ??? vjh OR fhq -> z14
-    // (z10,And(z10,mvs,jvj))
-    // (z34,And(z34,y34,x34))
-    // (z14,Or(z14,vjh,fhq))
-    // z00,z01,z02,z05
+    // Manually look at stdout and swap accordingly
+    swap(ops, "wjb", "cvp")
+    swap(ops, "wcb", "z34")
+    swap(ops, "mkk", "z10")
+    swap(ops, "qbw", "z14")
 
-    0.until(nbrZ).foreach { z =>
-      println(z)
-      val a = Math.pow(2, z).toLong
-      val b = 0
+    validate(ops)
+    val pairs: Seq[(String, String)] = getCombinations(candidates)
+    println(s"Got ${candidates.size} candidates, ${pairs.size} pairs")
 
-      if z == 10 then
-        var x = 3
-      var bits = doCompute(ops, a, b)
+    Seq("wjb", "cvp", "wcb", "z34", "mkk", "z10", "qbw", "z14").sorted.mkString(",")
 
-      val xUsed: Option[Set[String]] = usedBy.get(getRef(z, "x"))
-      val zRef = getRef(z, "z")
-      assert(xUsed.isDefined)
-      assert(xUsed.get.contains(zRef))
-      val yUsed: Option[Set[String]] = usedBy.get(getRef(z, "y"))
-      assert(yUsed.isDefined)
-      assert(yUsed.get.contains(zRef))
+  var candidates: Seq[String] = Seq()
 
-      assert(bits(z)._2 == "1")
-      bits = doCompute(ops, b, a)
-      assert(bits(z)._2 == "1")
+  private def validate(ops: mutable.Map[String, Day24.Op]) =
+    val zRefs = ops.keys.filter(_.startsWith("z")).toSeq.sorted
+    // Skip edges, I think they are structured differently
+    2.until(zRefs.size - 1).reverse.foreach { i =>
+      val zRef = getRef(i, "z")
+      val result = ops(zRef) match
+        case Xor(ref, a, b) =>
+          validateZi(ops, ops(a), ops(b), i, ref) && existsAnd(ops, getRef(i, "x"), getRef(i, "y"), i)
+        case other =>
+          candidates = candidates :+ zRef
+          println(s"Wanted Xor but got $other at $i for: $zRef")
 
-      println(s"${zRef} ok")
+//      xi xor yi -> a_i
+//      xi and yi -> b_i
+//      ai and carry_(i - 1) -> c_i
+//      ai xor carry_(i - 1) -> z_i
+//      b_i or c_i -> carry_i
+
     }
 
-    "-1"
+  private def existsAnd(ops: mutable.Map[String, Op], a: String, b: String, i: Int): Boolean =
+    val result = ops.collect {
+      case (_, And(ref, left, right)) if left == a && right == b || left == b && right == a => true
+    }
+      .size == 1
+    if !result then
+      println(s"Wanted And(${a}, ${b}) but none found at $i")
+
+    result
+
+  private def validateZi(ops: mutable.Map[String, Op], left: Op, right: Op, i: Int, ref: String): Boolean =
+    (left, right) match
+      case (Xor(_, a, b), Or(prevCarry, c, d)) =>
+        validateAi(ops, ops(a), ops(b), i) && validatePrevCarry(ops, ops(c), ops(d), i, prevCarry)
+      case (Or(prevCarry, c, d), Xor(_, a, b)) =>
+        validateAi(ops, ops(a), ops(b), i) && validatePrevCarry(ops, ops(c), ops(d), i, prevCarry)
+      case other =>
+        println(s"Wanted (Xor,Or) but got $other at $i for: $ref")
+        candidates = candidates :+ ref
+        false
+
+  private def validateAi(ops: mutable.Map[String, Op], left: Op, right: Op, i: Int): Boolean =
+    (left, right) match
+      case (Literal(xRef, _), Literal(yRef, _)) if xRef == getRef(i, "x") && yRef == getRef(i, "y") => true
+      case (Literal(yRef, _), Literal(xRef, _)) if xRef == getRef(i, "x") && yRef == getRef(i, "y") => true
+      case other =>
+        println(s"Wanted (Literal,Literal) but got $other at $i")
+        false
+
+  private def validatePrevCarry(
+      ops: mutable.Map[String, Op],
+      left: Op,
+      right: Op,
+      i: Int,
+      prevCarryRef: String
+  ): Boolean =
+    (left, right) match
+      case (And(_, _, _), And(_, _, _)) => true
+      case other =>
+        println(s"Wanted (And,And) but got $other for: $prevCarryRef")
+        candidates = candidates :+ prevCarryRef
+        false
+
+  private def writeGraphViz(ops: mutable.Map[String, Op]) =
+    val path = Paths.get("output.graph")
+
+    val sb = new StringBuilder()
+
+    sb.append("digraph TheGraph {\n")
+
+    ops.foreach { case (ref, op) =>
+      val str = op match
+        case Literal(ref, value) =>
+          ""
+        case And(ref, a, b) =>
+          sb.append(s"$a -> $ref [label=\"and\"];\n")
+          sb.append(s"$b -> $ref [label=\"and\"];\n")
+        case Or(ref, a, b) =>
+          sb.append(s"$a -> $ref [label=\"or\"];\n")
+          sb.append(s"$b -> $ref [label=\"or\"];\n")
+        case Xor(ref, a, b) =>
+          sb.append(s"$a -> $ref [label=\"xor\"];\n")
+          sb.append(s"$b -> $ref [label=\"xor\"];\n")
+    }
+    sb.append("\n}")
+
+    Try {
+      Files.delete(path)
+    }
+    Files.write(
+      path,
+      sb.toString.getBytes(StandardCharsets.UTF_8),
+      StandardOpenOption.CREATE,
+      StandardOpenOption.WRITE
+    )
 
   private def swap(ops: mutable.Map[String, Op], a: String, b: String) =
     val temp = ops(a)
@@ -153,7 +236,6 @@ object Day24:
     val zRefs = ops.keys.filter(_.startsWith("z")).toSeq.sorted.reverse
     zRefs.map(ref => (ref, if compute(ops, ref, ref, analyze) then "1" else "0")).reverse
 
-  // 001001
   private def getRef(i: Int, prefix: String) =
     if i <= 9 then
       s"${prefix}0$i"
