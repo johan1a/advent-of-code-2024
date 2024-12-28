@@ -31,16 +31,10 @@ object Day24:
 
   def part2(input: Seq[String], n: Int = 4): String =
     val opSeq = parse(input)
-    val refs: Seq[String] = opSeq.map(_.ref).toArray
-    val ops: mutable.Map[String, Op] = mutable.Map[String, Op]() // opSeq.map(op => op.ref -> op).toMap
+    val ops: mutable.Map[String, Op] = mutable.Map[String, Op]()
     opSeq.foreach { op =>
       ops.put(op.ref, op)
     }
-    val nbrZ = refs.count(_.startsWith("z"))
-
-    val a = Math.pow(2, 10).toLong
-    val b = 1L
-    val badOutputs = getBadOutputs(ops, a, b)
 
     // Manually look at stdout and swap accordingly
     swap(ops, "wjb", "cvp")
@@ -119,6 +113,7 @@ object Day24:
         candidates = candidates :+ prevCarryRef
         false
 
+  // dot -T png output.graph -o graph.png
   private def writeGraphViz(ops: mutable.Map[String, Op]) =
     val path = Paths.get("output.graph")
 
@@ -168,7 +163,6 @@ object Day24:
 
   private def getBadOutputs(ops: mutable.Map[String, Op], x: Long, y: Long, analyze: Boolean = true): Seq[String] =
     try
-
       val expectedBits = getPrefixedBits(x + y, "z")
       val expected = parseBits(expectedBits)
       assert(expected == x + y)
