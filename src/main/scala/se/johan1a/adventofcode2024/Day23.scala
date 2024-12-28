@@ -60,11 +60,9 @@ object Day23:
     )
 
     var best = Set[String]()
-    var seen = Set[String]()
 
     allNeighbors.foreach { (comp, neighbors) =>
       var set = Set[String](comp)
-      seen = seen + comp
       neighbors.foreach { neighbor =>
         if set.forall(c => allNeighbors(neighbor).contains(c)) then
           set = set + neighbor
