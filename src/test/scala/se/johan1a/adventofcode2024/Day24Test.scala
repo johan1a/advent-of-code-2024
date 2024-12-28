@@ -41,6 +41,16 @@ class Day24Test extends munit.FunSuite:
     )
   }
 
+  test("Part 2 test2") {
+    val actual = Day24.getCombinations(Seq("A", "B", "C"))
+    val expected = Seq(
+      ("A", "B"),
+      ("A", "C"),
+      ("B", "C")
+    )
+    assertEquals(actual, expected)
+  }
+
   test("Part 2") {
     assertEquals(Day24.part2(getInput("day24/input.txt")), "")
   }
