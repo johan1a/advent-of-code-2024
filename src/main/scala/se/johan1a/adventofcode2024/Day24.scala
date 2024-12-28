@@ -1,6 +1,6 @@
 package se.johan1a.adventofcode2024
 
-import se.johan1a.adventofcode2024.Utils.{split, splitOnce}
+import se.johan1a.adventofcode2024.Utils.{getCombinations, split, splitOnce}
 
 import java.nio.charset.StandardCharsets
 import java.nio.file.{Files, Paths, StandardOpenOption}
@@ -156,15 +156,6 @@ object Day24:
     val temp = ops(a)
     ops.put(a, ops(b))
     ops.put(b, temp)
-
-  def getCombinations[T](seq: Seq[T]): Seq[(T, T)] =
-    var combinations = Seq[(T, T)]()
-    seq.indices.foreach { i =>
-      (i + 1).until(seq.size).foreach { j =>
-        combinations = combinations :+ (seq(i), seq(j))
-      }
-    }
-    combinations
 
   private def getPossibleToSwap(refs: Seq[String], badOutputs: Seq[String], used: Map[String, Set[String]]) =
     val goodOutputs = refs.filter(r => r.startsWith("z") && !badOutputs.contains(r))

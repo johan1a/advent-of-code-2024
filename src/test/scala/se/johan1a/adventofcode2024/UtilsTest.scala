@@ -21,3 +21,14 @@ class UtilsTest extends munit.FunSuite:
 
     assertEquals(actual, Some(Vec2(1, 2)))
   }
+
+  test("getCombinations") {
+    val actual = getCombinations(Seq("A", "B", "C"))
+    val expected = Seq(
+      ("A", "B"),
+      ("A", "C"),
+      ("B", "C")
+    )
+    assertEquals(actual, expected)
+  }
+

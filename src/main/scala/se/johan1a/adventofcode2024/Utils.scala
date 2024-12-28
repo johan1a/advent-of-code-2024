@@ -293,3 +293,13 @@ object Utils:
     if a == 0 && b == 0 then 0
     else if b == 0 then a
     else gcd(b, a % b)
+
+  def getCombinations[T](seq: Seq[T]): Seq[(T, T)] =
+    var combinations = Seq[(T, T)]()
+    seq.indices.foreach { i =>
+      (i + 1).until(seq.size).foreach { j =>
+        combinations = combinations :+ (seq(i), seq(j))
+      }
+    }
+    combinations
+
