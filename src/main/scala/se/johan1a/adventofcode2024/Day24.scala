@@ -18,12 +18,12 @@ object Day24:
   def part1(input: Seq[String]): Long =
     val ops = parse(input).map(op => op.ref -> op).toMap
     val zRefs = ops.filter(_._1.startsWith("z")).keys.toSeq.sorted.reverse
-    val bits = zRefs.map(ref => compute(ops, ref)).map(b => if b then "1" else "0").mkString
+    val bits = zRefs.map(ref => compute(ops, ref, ref)).map(b => if b then "1" else "0").mkString
     java.lang.Long.parseLong(bits, 2)
 
   def part2(input: Seq[String], n: Int = 4): String =
     val opSeq = parse(input)
-    val refs = opSeq.map(_.ref)
+    val refs: Seq[String] = opSeq.map(_.ref)
     val ops: mutable.Map[String, Op] = mutable.Map[String, Op]() // opSeq.map(op => op.ref -> op).toMap
     opSeq.foreach { op =>
       ops.put(op.ref, op)
@@ -33,7 +33,18 @@ object Day24:
     val allOnes: Long = java.lang.Long.parseLong(0.until(nbrZ).map(_ => "1").mkString, 2)
     val badOutputs = getBadOutputs(ops, allOnes, 0L)
 
+    val possible = getPossibleToSwap(refs, badOutputs, usedBy.toMap)
+
     ""
+
+  private def getPossibleToSwap(refs: Seq[String], badOutputs: Seq[String], used: Map[String, Set[String]]) =
+    val goodOutputs = refs.filter(r => r.startsWith("z") && !badOutputs.contains(r))
+    refs.filter { ref =>
+      val gatesUsed = used.getOrElse(ref, Set.empty)
+      goodOutputs.forall(goodOutput =>
+        !gatesUsed.contains(goodOutput)
+      )
+    }
 
   private def getBadOutputs(ops: mutable.Map[String, Op], x: Long, y: Long): Seq[String] =
     put(ops, x, "x")
@@ -72,9 +83,12 @@ object Day24:
       2
     )
 
+  var usedBy: Map[String, Set[String]] = Map()
+
   private def computeToBits(ops: Map[String, Op]) =
+    usedBy = Map()
     val zRefs = ops.keys.filter(_.startsWith("z")).toSeq.sorted.reverse
-    zRefs.map(ref => (ref, if compute(ops, ref) then "1" else "0")).reverse
+    zRefs.map(ref => (ref, if compute(ops, ref, ref) then "1" else "0")).reverse
 
   // 001001
   private def getRef(i: Int, prefix: String) =
@@ -83,12 +97,14 @@ object Day24:
     else
       s"$prefix$i"
 
-  private def compute(refs: Map[String, Op], ref: String): Boolean =
+  private def compute(refs: Map[String, Op], ref: String, topRef: String): Boolean =
+    val used: Set[String] = usedBy.getOrElse(ref, Set.empty)
+    usedBy = usedBy + (ref -> (used + topRef))
     refs(ref) match
       case Literal(ref, value) => value
-      case And(ref, a, b)      => compute(refs, a) && compute(refs, b)
-      case Or(ref, a, b)       => compute(refs, a) || compute(refs, b)
-      case Xor(ref, a, b)      => compute(refs, a) ^ compute(refs, b)
+      case And(ref, a, b)      => compute(refs, a, topRef) && compute(refs, b, topRef)
+      case Or(ref, a, b)       => compute(refs, a, topRef) || compute(refs, b, topRef)
+      case Xor(ref, a, b)      => compute(refs, a, topRef) ^ compute(refs, b, topRef)
 
   private def parse(input: Seq[String]): Seq[Op] =
     val splitted = split(input)
